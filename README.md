@@ -20,6 +20,6 @@ mikael.mieskolainen@cern.ch, 2019
 
 *External dependencies:
 
-- ALICE experiment AliROOT framework (however, algorithms here are experiment generic)
+- ALICE experiment AliROOT framework (however, algorithms here are fully generic)
 - ROOUnfold (in libs)
 - csv reader (in libs, BSD3 license)
