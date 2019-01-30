@@ -20,6 +20,6 @@ mikael.mieskolainen@cern.ch, 2019
 
 *External dependencies:
 
-- <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</>, however, algorithms here are fully generic
+- <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</a>, however, algorithms here are fully generic
 - <a href="http://hepunx.rl.ac.uk/~adye/software/unfold/RooUnfold.html">ROOUnfold</a> (in /libs)
 - csv reader (in /libs, BSD3 license)
