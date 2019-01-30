@@ -11,7 +11,7 @@ https://arxiv.org/abs/1612.00980
 - Multivariate Maximum Likelihood fit extraction of the effective Pomeron intercept 1 + &Delta;
 - Multivariate Maximum Likelihood fit extraction of the diffractive cross sections (SD, DD, ND) and the maximum diffractive mass dependence (minimum average rapidity gap size <&Delta;Y>)
 - Möbius inversion of pileup
-- Multidimensional algebraic hierarchy of detector level distributions (raw multiplicity etc.) - highly constraining comparison with MC models
+- Multidimensional algebraic hierarchy of detector level distributions (raw multiplicity etc.) - highly constraining comparison with MC models, probing AGK rules / multipomeron cuts / soft multiparton interactions
 
 For reference, you may cite the paper above.
 
