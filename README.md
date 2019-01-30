@@ -20,6 +20,6 @@ mikael.mieskolainen@cern.ch, 2019
 
 *External dependencies:
 
-- ALICE experiment AliROOT framework (however, algorithms here are fully generic)
-- ROOUnfold (in libs)
-- csv reader (in libs, BSD3 license)
+- <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</>, however, algorithms here are fully generic
+- <a href="http://hepunx.rl.ac.uk/~adye/software/unfold/RooUnfold.html">ROOUnfold</a> (in /libs)
+- csv reader (in /libs, BSD3 license)
