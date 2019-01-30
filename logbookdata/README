@@ -1,0 +1,6 @@
+The logbook data from ALICE e-logbook exported to excel.
+- From excel to csv.
+- Extra spaces removed
+- Header line modified to have unique column names.
+
+mikael.mieskolainen@cern.ch, 2018
