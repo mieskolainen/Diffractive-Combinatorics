@@ -23,3 +23,5 @@ mikael.mieskolainen@cern.ch, 2019
 - <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</a> (FYI: algorithms here are fully experiment generic)
 - <a href="http://hepunx.rl.ac.uk/~adye/software/unfold/RooUnfold.html">ROOUnfold</a> (in /libs)
 - <a href="https://github.com/ben-strasser/fast-cpp-csv-parser">csv parser</a> (in /libs, BSD-3 license)
+
+In general, one needs to modify Makefile for your local installation.
