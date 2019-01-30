@@ -5,7 +5,7 @@ https://arxiv.org/abs/1612.00980
 
 High Energy Diffraction at the LHC via Combinatorial (incidence) Algebra
 
-Novel constructions implemented:
+Novel constructions and algorithms:
 
 - Unfolded multidimensional 'fiducial vector cross sections'
 - Multivariate Maximum Likelihood fit extraction of the effective Pomeron intercept 1 + Delta
