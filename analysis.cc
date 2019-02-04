@@ -23,7 +23,7 @@
 // DEVELOPE:
 // 
 // - Add to output print the detector low-level timing etc. cuts, masked SPD chips etc.
-// - Print out the folding matri for MATLAB analysis
+// - Print out the folding matrix for MATLAB analysis
 // 
 //
 // mikael.mieskolainen@cern.ch, 2018

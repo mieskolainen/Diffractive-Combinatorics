@@ -110,11 +110,8 @@ public:
 
 	// Combined plots
 	void PrintCrossSections();
-
 	void PlotAll1D();
-	void PlotAllFactorization();
 	void PlotAllMatrix();
-	void PlotAll(TString det_or_gen, Bool_t LR_mode_on, Bool_t sort_on);
 	void ratioplot(TCanvas*& c, TPad*& pad1, TPad*& pad2);
 	
 	// Beam-Gas correction for the histograms
