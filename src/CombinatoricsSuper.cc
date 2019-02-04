@@ -615,7 +615,7 @@ Double_t CombinatoricsSuper::Unfold(Int_t Input_index, Int_t Model_index) {
 	A2->SetTitleSize(0.03);
 	A2->SetTitleOffset(1.2);
 	*/
-	
+
   	// Add legend
   	std::vector<std::string> names = {"Unfolded fiducial", "Measured visible", "True fiducial"};
   	std::vector<TH1*> histo; histo.push_back(hReco); histo.push_back(hMeas); histo.push_back(hTrue);
@@ -1682,7 +1682,7 @@ std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, I
 
 
 	// --------------------------------------------------------------------------
-	// Semi Data-Driven total inelastic extrapolation
+	// Total inelastic extrapolation visualization
 
 	if (final_round) {
 
@@ -1706,15 +1706,16 @@ std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, I
 		 	param_tot <= sigma_inel_max; param_tot += 0.01) {
 
 		// ---------------------------------------------------------------
-		// Variational optimization loop
+		// "Variational loop"
 
 		// Now extract the efficiency and subsequantly the total inelastic,
-		// under the solid constraint: P(SDL_tot) = P(SDR_tot)
+		// under the solid constraint: P(SDL_tot) = P(SDR_tot). This routine
+		// is plain logic.
 
-		// The first free parameter here (Regularization strength, 0 makes problem to oscillate)
+		// Technical parameter ("Floating point control", 0 gives floating point problems)
 		const Double_t lambda = 0.05; 
 
-		// The second free parameter here, minimum efficiency for single diffraction (left or right)
+		// Boundary condition (minimum efficiency for single diffraction (left or right))
 		const Double_t SD_eff_min = 0.5;
 
 		Double_t min_L = 1e99;
