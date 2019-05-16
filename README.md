@@ -1,4 +1,4 @@
-# DiffractiveCombinatorics
+# Diffractive-Combinatorics
 https://arxiv.org/abs/1612.00980
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
