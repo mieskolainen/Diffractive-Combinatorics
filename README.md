@@ -5,6 +5,8 @@ https://arxiv.org/abs/1612.00980
 
 ## High Energy Diffraction at the LHC via Combinatorial (incidence) Algebra
 
+<img width="600px" src="figs/comb1.jpg">
+
 ### Framework with novel constructions and algorithms:
 
 - Unfolded multidimensional 'fiducial vector cross sections'
