@@ -157,9 +157,7 @@ for i = 1:size(ind_list,1)
     fprintf('\\renewcommand{\\arraystretch}{1.4}\n');
     fprintf('\\begin{tabular}{|cc|ccc|ccc|}\n');
     fprintf('\\hline\n');
-    fprintf('   &  &  &  \\textsc{X-Section} &          &  & \\textsc{Systematics} & \\\\ \n');
-    fprintf('\\hline \n');
-    fprintf('& & value (mb) & stat & tot.syst & lumi & unfold & run-by-run \\\\ \n');
+    fprintf('& \\small{\\textsc{X-Section\} & value (mb) & stat & tot.syst & lumi & unfold & run-by-run \\\\ \n');
     fprintf('\\hline \n');
 
     if (PLOT_ON)
