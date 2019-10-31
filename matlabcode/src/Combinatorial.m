@@ -400,7 +400,7 @@ for i = 1:size(ind_list,1)
     
     fprintf('\\hline \n');
     fprintf('\\end{tabular} \n');
-    fprintf('\\caption{Fiducial cross sections [%d,%d].} \n', ind_list(i,1)-1, ind_list(i,2)-1);
+    fprintf('\\caption{Fiducial partial cross sections [%d,%d].} \n', ind_list(i,1)-1, ind_list(i,2)-1);
     fprintf('\\label{table:xstable%d} \n', i);
     fprintf('\\end{center} \n');
     fprintf('\\end{table} \n');
