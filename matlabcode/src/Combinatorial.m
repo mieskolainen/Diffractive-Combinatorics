@@ -114,7 +114,7 @@ end
 RBR_relative_low  = ones(size(SIGMA));
 RBR_relative_high = ones(size(SIGMA));
 
-for ID1 = 1:length(param.runs)
+for ID1 = 1
     for ID2 = 1:length(param.runs)
         for c = 1:2^N
             for unfold_iter = 1:REGITER
@@ -157,7 +157,7 @@ for i = 1:size(ind_list,1)
     fprintf('\\renewcommand{\\arraystretch}{1.4}\n');
     fprintf('\\begin{tabular}{|cc|ccc|ccc|}\n');
     fprintf('\\hline\n');
-    fprintf('& \\small{\\textsc{X-Section\} & value (mb) & stat & tot.syst & lumi & unfold & run-by-run \\\\ \n');
+    fprintf('& \\small{\\textsc{X-Section}} & value (mb) & stat & tot.syst & lumi & unfold & run-by-run \\\\ \n');
     fprintf('\\hline \n');
 
     if (PLOT_ON)
