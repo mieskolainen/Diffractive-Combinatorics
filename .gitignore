@@ -1,4 +1,8 @@
+# Ignore all these
 *.pdf
 *.out
 *.csv
+
+# Ignore folder named 'figures_xsec'
+figures_xsec/
 
