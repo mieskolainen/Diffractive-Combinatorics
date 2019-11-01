@@ -20,7 +20,9 @@ param.sigma_inel_MC  = 80;                    % Total inelastic in MC
 % First one is the central, others are used for run-by-run variations
 param.runs = [274595, 274593, 274594];
 
-PLOT_ON = true;
+for mode = [true false]
+
+PLOT_ON = mode; % if false, only table printed out in proper ID order
 DATA_ON = true;
 FIT_ON  = true;
 for model = 1
@@ -99,5 +101,6 @@ system(sprintf('pdfcrop --margins 10 ./combfigs/%s ./combfigs/%s', outputfile, o
 
 end
 
+end
 %%
 system('source copyplots.sh');

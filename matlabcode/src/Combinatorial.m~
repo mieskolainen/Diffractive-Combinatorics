@@ -134,10 +134,10 @@ for ID1 = 1:length(param.runs)
 end
 
 % Take into account the min/max uniform variations in terms of 1 sigma
-% division by sqrt(12) comes from Var(uniform rnd) = (b-a)^2/12
-% times 2 comes for accounting one-sided vs two-sided
-RBR_relative_high = 1 + 2*(RBR_relative_high - 1) / sqrt(12);
-RBR_relative_low  = 1 - 2*(1- RBR_relative_low)   / sqrt(12);
+% divisiosqrt(12) comes from Var(uniform rnd) = (b-a)^2/12
+% division by 2 comes from one sided definition
+RBR_relative_high = 1 + (RBR_relative_high - 1) / (sqrt(12) / 2);
+RBR_relative_low  = 1 - (1- RBR_relative_low)   / (sqrt(12) / 2);
 
 end % DATA_ON
 
