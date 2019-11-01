@@ -5,7 +5,7 @@
 
 clear; close all;
 addpath ./src
-param.basepath = '/home/user/cernbox/ALICE/offline_new/figures_xsec';
+param.basepath = '../figures_xsec';
 
 % Unfolding iteration range
 param.hih = 6;           % Maximum iteration
@@ -20,7 +20,7 @@ param.sigma_inel_MC  = 80;                    % Total inelastic in MC
 % First one is the central, others are used for run-by-run variations
 param.runs = [274595, 274593, 274594];
 
-PLOT_ON = false;
+PLOT_ON = true;
 DATA_ON = true;
 FIT_ON  = true;
 for model = 1
@@ -98,3 +98,6 @@ print(fig, sprintf('./combfigs/%s', outputfile), '-dpdf');
 system(sprintf('pdfcrop --margins 10 ./combfigs/%s ./combfigs/%s', outputfile, outputfile));
 
 end
+
+%%
+system('source copyplots.sh');

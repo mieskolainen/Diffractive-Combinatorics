@@ -114,7 +114,7 @@ end
 RBR_relative_low  = ones(size(SIGMA));
 RBR_relative_high = ones(size(SIGMA));
 
-for ID1 = 1
+for ID1 = 1:length(param.runs)
     for ID2 = 1:length(param.runs)
         for c = 1:2^N
             for unfold_iter = 1:REGITER
@@ -133,6 +133,11 @@ for ID1 = 1
     end
 end
 
+% Take into account the min/max uniform variations in terms of 1 sigma
+% sqrt(12) comes from Var(uniform rnd) = (b-a)^2/12
+RBR_relative_high = 1 + (RBR_relative_high - 1) / sqrt(12);
+RBR_relative_low  = 1 - (1- RBR_relative_low)   / sqrt(12);
+
 end % DATA_ON
 
 % ========================================================================
@@ -146,19 +151,25 @@ ind_list  = [ 1 16;
 if (DATA_ON)
     fprintf('\n');
     fprintf('Run %d fiducial partial cross sections: \n', param.runs(1));
+    
+    % Open text output
+    outputfile = sprintf('./combfigs/xstable_%d.tex', param.runs(1));
+    fp = fopen(outputfile, 'w');
+    
+    fprintf('Writing .tex output to %s \n', outputfile);
 end
 
 % Loop over data in blocks of indices
 for i = 1:size(ind_list,1)
     
-    fprintf('\n');
-    fprintf('\\begin{table}\n');
-    fprintf('\\begin{center}\n');
-    fprintf('\\renewcommand{\\arraystretch}{1.4}\n');
-    fprintf('\\begin{tabular}{|cc|ccc|ccc|}\n');
-    fprintf('\\hline\n');
-    fprintf('& \\small{\\textsc{X-Section}} & value (mb) & stat & tot.syst & lumi & unfold & run-by-run \\\\ \n');
-    fprintf('\\hline \n');
+    fprintf(fp,'\n');
+    fprintf(fp,'\\begin{table}\n');
+    fprintf(fp,'\\begin{center}\n');
+    fprintf(fp,'\\renewcommand{\\arraystretch}{1.4}\n');
+    fprintf(fp,'\\begin{tabular}{|cc|ccc|ccc|}\n');
+    fprintf(fp,'\\hline\n');
+    fprintf(fp,'& \\small{\\textsc{X-Section}} & value (mb) & stat & tot.syst & lumi & unfold & run-by-run \\\\ \n');
+    fprintf(fp,'\\hline \n');
 
     if (PLOT_ON)
         fig = figure('units','normalized','outerposition',[0 0 1 1]);
@@ -210,7 +221,7 @@ for i = 1:size(ind_list,1)
             % ============================================================
             
             % Print out
-            fprintf('%d & %s & $%0.3f$ & $\\pm %0.3f$ & $_{-%0.3f}^{+%0.3f}$ & $\\pm %0.3f$ & $_{-%0.3f}^{+%0.3f}$ & $_{-%0.3f}^{+%0.3f}$ \\\\ \n', ...
+            fprintf(fp,'%d & %s & $%0.3f$ & $\\pm %0.3f$ & $_{-%0.3f}^{+%0.3f}$ & $\\pm %0.3f$ & $_{-%0.3f}^{+%0.3f}$ & $_{-%0.3f}^{+%0.3f}$ \\\\ \n', ...
                 ind(k) - 1, ...
                 ylabels{ind(k)}, ...
                 SIGMA(ind(k), param.cen), ...
@@ -398,12 +409,12 @@ for i = 1:size(ind_list,1)
     
     end % If FIT_ON
     
-    fprintf('\\hline \n');
-    fprintf('\\end{tabular} \n');
-    fprintf('\\caption{Fiducial partial cross sections [%d,%d].} \n', ind_list(i,1)-1, ind_list(i,2)-1);
-    fprintf('\\label{table:xstable%d} \n', i);
-    fprintf('\\end{center} \n');
-    fprintf('\\end{table} \n');
+    fprintf(fp, '\\hline \n');
+    fprintf(fp, '\\end{tabular} \n');
+    fprintf(fp, '\\caption{Fiducial partial cross sections [%d,%d].} \n', ind_list(i,1)-1, ind_list(i,2)-1);
+    fprintf(fp, '\\label{table:xstable%d} \n', i);
+    fprintf(fp, '\\end{center} \n');
+    fprintf(fp, '\\end{table} \n');
     
 end % Over different combinations
 

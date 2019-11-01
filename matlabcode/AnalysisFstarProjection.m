@@ -7,7 +7,7 @@ clear; close all;
 addpath /home/user/cernbox/#matlabcodes
 addpath ./src
 
-basepath = '/home/user/cernbox/ALICE/offline_new/figures_xsec';
+param.basepath = '/home/user/cernbox/ALICE/Diffractive-Combinatorics/figures_xsec';
 
 % 274593, 274594, 274595
 run = 274595;
