@@ -14,12 +14,12 @@ ND = 12;   % Match this with C++ code (one should make this automatic!!)
 % **** DISCRETIZATION MANUALLY HERE!! ****
 
 % Detector (1), Unfolded (2)
-level = 1;
+level = 2;
 
 % Ascii file column indices for reading out the fit results
 INTERCEPT_ind = 2;
 DELTAY_ind    = 3;
-COST_ind      = 4;
+COST_ind      = 5;
 
 if (COST_ind == 4)
     cost_str = '$-\ln(L)$';
@@ -53,8 +53,6 @@ for model = 1:length(mc)
     figures = {};
     i = 1;
     
-POM_DELTA = [];
-
 for run = runs
     
     M = csvread(sprintf('../figures_xsec/%d/Fit/Fit_level_%d_Input_Data-%d_Model_%s.csv', run, level, run, mc{model}), 1,0);
@@ -101,10 +99,7 @@ for run = runs
     xx    = XX(min_row,:);
     [a,b] = min(xx);
     yy    = XX(:,b);
-    
-    POM_DELTA(end+1) = x_values(b);
-    fprintf('Model = %s : Run = %d : Effective Pomeron intercept = %0.3f \n', mc{model}, run, POM_DELTA(end));
-        
+
     % Minimum rapidity gap <Delta Y>_min cutoff definition
     figure(f2);
     plot(y_values, yy, 'linewidth', 1.2, 'color', colors(i,:)); axis square; axis tight; hold on;
@@ -120,6 +115,8 @@ for run = runs
     %axis([-inf inf min(xx)*0.95 max(xx)*1.05]);
     xlabel('Re-weight $\Delta_P$ (effective Pomeron intercept - 1)','interpreter','latex');
     ylabel(cost_str,'interpreter','latex');
+    
+    fprintf('ModelRun = %d : Effective Pomeron intercept = %0.5f \n', run, x_values(b));
     
     % Likelihood mode
     if (COST_ind == 4)
@@ -158,9 +155,6 @@ for run = runs
         fprintf('DELTA_P = [%0.5f %0.5f %0.5f] \n', x_values(low_in), x_values(min_ind), x_values(up_ind));
         set(gca,'yscale','log');
     end
-    
-    fprintf('Average and standard error of mean: \n');
-    disp(POM_DELTA);
     
     i = i + 1;
 end
