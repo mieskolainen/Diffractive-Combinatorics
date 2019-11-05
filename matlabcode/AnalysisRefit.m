@@ -9,11 +9,12 @@ clear; close all;
 addpath ./src
 colors = get(gca,'ColorOrder');
 
-% Discretization
-ND = 30;   % Match this with C++ code (one should make this automatic!!)
+% **** DISCRETIZATION MANUALLY HERE!! ****
+ND = 12;   % Match this with C++ code (one should make this automatic!!)
+% **** DISCRETIZATION MANUALLY HERE!! ****
 
 % Detector (1), Unfolded (2)
-level = 2;
+level = 1;
 
 % Ascii file column indices for reading out the fit results
 INTERCEPT_ind = 2;
@@ -51,19 +52,17 @@ for model = 1:length(mc)
     f2 = figure;
     figures = {};
     i = 1;
+    
 for run = runs
     
-    if (model == 1)
-        M = csvread(sprintf('../figures_xsec/%d/Fit/Fit_level_%d_Input_Data-%d_Model_%s.csv', run, level, run, mc{model}), 1,0);
-    end
-    if (model == 2)
-        M = csvread(sprintf('../figures_xsec/%d/Fit/Fit_level_%d_Input_Data-%d_Model_%s.csv', run, level, run, mc{model}), 1,0);
-    end
+    M = csvread(sprintf('../figures_xsec/%d/Fit/Fit_level_%d_Input_Data-%d_Model_%s.csv', run, level, run, mc{model}), 1,0);
     
     % Discretization
     x_values = M(1:ND:end, INTERCEPT_ind);
     y_values = M(1:ND, DELTAY_ind);
-    X = reshape(M(:, COST_ind),[ND ND]);
+    
+    X = reshape(M(:, COST_ind), [ND ND]);
+    
     
     %%
     % Interpolated values

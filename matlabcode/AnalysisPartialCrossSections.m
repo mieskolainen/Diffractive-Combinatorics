@@ -12,10 +12,16 @@ param.hih = 6;           % Maximum iteration
 param.cen = 4;           % Central value
 param.low = 2;           % Minimum iteration
 
+% ------------------------------------------------------------------------
 % *** SET HERE MANUALLY BASED ON C++ CODE + EXTERNAL INFO ***
 param.relative_lumi_uncertainty = 1.2 / 57.8; % V0-AND vdM +- / V0-AND vdM value
-param.sigma_inel_fid = 72;                    % Measured total fiducial in data
+param.sigma_inel_fid = 71.4;                  % Measured total fiducial in data
 param.sigma_inel_MC  = 80;                    % Total inelastic in MC
+
+% Total inelastic based on the Pythia-6 re-tune
+mu_tot     = 77.3; 
+tot_uncert = 2.1;
+% ------------------------------------------------------------------------
 
 % First one is the central, others are used for run-by-run variations
 param.runs = [274595, 274593, 274594];
@@ -64,9 +70,6 @@ color = ones(3,1)*0.9;
 
 % Robust estimates
 MC_estimate = mins ./ acceptances;
-
-mu_tot     = 78.4; % From Pythia-6 re-tune
-tot_uncert = median(abs(MC_estimate - median(MC_estimate))) * 1.4826;
 
 % Upper [central ... high)
 %rectangle('Position', [mu_tot 0.67 tot_uncert 0.16], 'FaceColor', color, 'EdgeColor', color, 'linewidth', 0.1);
