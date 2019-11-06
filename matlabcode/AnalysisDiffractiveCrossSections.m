@@ -8,7 +8,7 @@ addpath /home/user/cernbox/#matlabcodes
 addpath ./src
 
 % Model selection
-mc = {'Phojet_(17h7b)','Pythia-6_(17h7a)'};
+mc = {'Pythia-6_(17h7a)', 'Phojet_(17h7b)'};
 
 for mc_model = 1:length(mc)
 
@@ -34,7 +34,7 @@ chi2_ind    = 9;         % chi^2
 deltaPomeron_ind = 10;   % Pomeron intercept Delta_P
 deltaY_ind = 11;         % Minimum rapidity gap
 
-% Runlist [the first defines the medium, others give run-by-run]
+% Runlist [the first defines the central point, others give run-by-run variations]
 runID = [274595 274593 274594];
 
 % Extraction level
@@ -181,4 +181,5 @@ end
 
 %%
 system('source copyplots.sh');
+
 
