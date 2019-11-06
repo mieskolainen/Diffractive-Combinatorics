@@ -1,8 +1,6 @@
 % Diffractive Cross Sections Pomeron Intercept and kinematic cutoff refit
 %
-% BUGS: FIX THE LEGEND LINES, they are broken now!
-%
-% mikael.mieskolainen@cern.ch, 2018
+% mikael.mieskolainen@cern.ch, 2019
 % Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 clear; close all;
@@ -13,14 +11,13 @@ colors = get(gca,'ColorOrder');
 ND = 12;   % Match this with C++ code (one should make this automatic!!)
 % **** DISCRETIZATION MANUALLY HERE!! ****
 
-% Detector (1), Unfolded (2)
-level = 1;
 
 % Ascii file column indices for reading out the fit results
 INTERCEPT_ind = 2;
 DELTAY_ind    = 3;
-COST_ind      = 4;
+COST_ind      = 5;
 
+% #Fit point, Mass re-weight DELTA, Min <DeltaY> cutoff, <neg log(L)>, <KL-divergence>, <KS-error>, <CHI2>
 if (COST_ind == 4)
     cost_str = '$-\ln(L)$';
 end
@@ -37,36 +34,49 @@ end
 runs = [274593 274594 274595];
 mc = {'Pythia-6_(17h7a)', 'Phojet_(17h7b)'};
 
+% Create label
+str = '';
+for i = 1:length(runs)
+    str = str + '_' + string(runs(i));
+end
+for i = 1:length(mc)
+    str = str + '_' + string(mc(i));
+end
+fp = fopen(sprintf('./fitfigs/refit_%s.tex', str), 'w');
+
 legs = {};
 for i = 1:length(runs)
    legs{i} = sprintf('Run %d', runs(i));
 end
 
-% #Fit point, Mass re-weight DELTA, Min <DeltaY> cutoff, <neg log(L)>, <KL-divergence>, <KS-error>, <CHI2>
-
+% Over MC models
 for model = 1:length(mc)
+
+% Over runs
+for run = runs
     
-    close all;
-    
-    f1 = figure;
-    f2 = figure;
-    figures = {};
-    i = 1;
+close all;
+
+f1 = figure;
+f2 = figure;
+figures = {};
+i = 1;
     
 POM_DELTA = [];
 
-for run = runs
+% Over Detector level (1), Unfolded level (2)
+for level = 1:2
     
-    M = csvread(sprintf('../figures_xsec/%d/Fit/Fit_level_%d_Input_Data-%d_Model_%s.csv', run, level, run, mc{model}), 1,0);
+    M = csvread(sprintf('../figures_xsec/%d/Fit/Fit_level_%d_Input_Data-%d_Model_%s.csv', ...
+        run, level, run, mc{model}), 1,0);
     
     % Discretization
     x_values = M(1:ND:end, INTERCEPT_ind);
     y_values = M(1:ND, DELTAY_ind);
-    
     X = reshape(M(:, COST_ind), [ND ND]);
     
-    
     %%
+    
     % Interpolated values
     FACTOR = 8; % Interpolation factor, one can change it here
     XX = interp2(X, FACTOR, 'spline');
@@ -158,15 +168,26 @@ for run = runs
         fprintf('DELTA_P = [%0.5f %0.5f %0.5f] \n', x_values(low_in), x_values(min_ind), x_values(up_ind));
         set(gca,'yscale','log');
     end
-    
-    fprintf('Average and standard error of mean: \n');
-    disp(POM_DELTA);
-    
     i = i + 1;
-end
-
+    
+end % Level
 
 %% Print out
+
+fprintf(fp, '%s & %d & ', mc{model}, run);
+
+for k = 1:length(POM_DELTA)
+   fprintf(fp, '%0.3f', POM_DELTA(k));
+   if (k < length(POM_DELTA))
+       fprintf(fp, ' & ');
+   else
+       fprintf(fp, ' \\\\ \n');
+   end
+end
+fprintf(fp, '\n');
+
+
+%% Plot out
 
 for k = 1:length(figures)
 figure(figures{k});
@@ -189,5 +210,10 @@ l = legend(legs); set(l,'interpreter','latex');
     print(f2, sprintf('./fitfigs/%s.pdf', outputfile), '-dpdf');
     system(sprintf('pdfcrop --margins 10 ./fitfigs/%s.pdf ./fitfigs/%s.pdf', outputfile, outputfile));
 
-end
+end % runs
+end % MC models
+
+fclose(fp);
+
+
 

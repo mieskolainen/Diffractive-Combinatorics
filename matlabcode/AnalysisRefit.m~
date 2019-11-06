@@ -13,14 +13,14 @@ colors = get(gca,'ColorOrder');
 ND = 12;   % Match this with C++ code (one should make this automatic!!)
 % **** DISCRETIZATION MANUALLY HERE!! ****
 
-% Detector (1), Unfolded (2)
-level = 2;
+fp = fopen('refit.tex','w');
 
 % Ascii file column indices for reading out the fit results
 INTERCEPT_ind = 2;
 DELTAY_ind    = 3;
 COST_ind      = 5;
 
+% #Fit point, Mass re-weight DELTA, Min <DeltaY> cutoff, <neg log(L)>, <KL-divergence>, <KS-error>, <CHI2>
 if (COST_ind == 4)
     cost_str = '$-\ln(L)$';
 end
@@ -37,23 +37,28 @@ end
 runs = [274593 274594 274595];
 mc = {'Pythia-6_(17h7a)', 'Phojet_(17h7b)'};
 
+% Over MC models
+for model = 1:length(mc)
+
+% Detector (1), Unfolded (2)
+for run = runs
+    
+close all;
+
+f1 = figure;
+f2 = figure;
+figures = {};
+i = 1;
+    
+POM_DELTA = [];
+
 legs = {};
 for i = 1:length(runs)
    legs{i} = sprintf('Run %d', runs(i));
 end
 
-% #Fit point, Mass re-weight DELTA, Min <DeltaY> cutoff, <neg log(L)>, <KL-divergence>, <KS-error>, <CHI2>
+for level = 1:2
 
-for model = 1:length(mc)
-    
-    close all;
-    
-    f1 = figure;
-    f2 = figure;
-    figures = {};
-    i = 1;
-    
-for run = runs
     
     M = csvread(sprintf('../figures_xsec/%d/Fit/Fit_level_%d_Input_Data-%d_Model_%s.csv', run, level, run, mc{model}), 1,0);
     
@@ -99,7 +104,10 @@ for run = runs
     xx    = XX(min_row,:);
     [a,b] = min(xx);
     yy    = XX(:,b);
-
+    
+    POM_DELTA(end+1) = x_values(b);
+    fprintf('Model = %s : Run = %d : Effective Pomeron intercept = %0.3f \n', mc{model}, run, POM_DELTA(end));
+        
     % Minimum rapidity gap <Delta Y>_min cutoff definition
     figure(f2);
     plot(y_values, yy, 'linewidth', 1.2, 'color', colors(i,:)); axis square; axis tight; hold on;
@@ -115,8 +123,6 @@ for run = runs
     %axis([-inf inf min(xx)*0.95 max(xx)*1.05]);
     xlabel('Re-weight $\Delta_P$ (effective Pomeron intercept - 1)','interpreter','latex');
     ylabel(cost_str,'interpreter','latex');
-    
-    fprintf('ModelRun = %d : Effective Pomeron intercept = %0.5f \n', run, x_values(b));
     
     % Likelihood mode
     if (COST_ind == 4)
@@ -155,12 +161,26 @@ for run = runs
         fprintf('DELTA_P = [%0.5f %0.5f %0.5f] \n', x_values(low_in), x_values(min_ind), x_values(up_ind));
         set(gca,'yscale','log');
     end
-    
     i = i + 1;
-end
-
+    
+end % runs
 
 %% Print out
+
+fprintf(fp, '%s & level%d & ', mc{model}, level);
+
+for k = 1:length(POM_DELTA)
+   fprintf(fp, '%0.3f', POM_DELTA(k));
+   if (k < length(POM_DELTA))
+       fprintf(fp, ' & ');
+   else
+       fprintf(fp, ' \\\\ \n');
+   end
+end
+fprintf(fp, '\n');
+
+
+%% Plot out
 
 for k = 1:length(figures)
 figure(figures{k});
@@ -183,5 +203,10 @@ l = legend(legs); set(l,'interpreter','latex');
     print(f2, sprintf('./fitfigs/%s.pdf', outputfile), '-dpdf');
     system(sprintf('pdfcrop --margins 10 ./fitfigs/%s.pdf ./fitfigs/%s.pdf', outputfile, outputfile));
 
-end
+end % MC models
+end % Level
+
+fclose(fp);
+
+
 
