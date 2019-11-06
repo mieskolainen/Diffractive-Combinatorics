@@ -5,12 +5,11 @@
 
 clear; close all;
 addpath ./src
-colors = get(gca,'ColorOrder');
+colors = get(gca, 'ColorOrder');
 
 % **** DISCRETIZATION MANUALLY HERE!! ****
 ND = 12;   % Match this with C++ code (one should make this automatic!!)
 % **** DISCRETIZATION MANUALLY HERE!! ****
-
 
 % Ascii file column indices for reading out the fit results
 INTERCEPT_ind = 2;
@@ -32,22 +31,20 @@ if (COST_ind == 7)
 end
 
 runs = [274593 274594 274595];
-mc = {'Pythia-6_(17h7a)', 'Phojet_(17h7b)'};
+mc   = {'Pythia-6_(17h7a)', 'Phojet_(17h7b)'};
 
-% Create label
+% Create filename
 str = '';
-for i = 1:length(runs)
-    str = str + '_' + string(runs(i));
-end
-for i = 1:length(mc)
-    str = str + '_' + string(mc(i));
-end
+for i = 1:length(runs), str = str + "_" + string(runs(i)); end
+for i = 1:length(mc),   str = str + "_" + string(mc(i));   end
 fp = fopen(sprintf('./fitfigs/refit_%s.tex', str), 'w');
 
+% Create Legends
 legs = {};
-for i = 1:length(runs)
-   legs{i} = sprintf('Run %d', runs(i));
-end
+for i = 1:length(runs), legs{i} = sprintf('Run %d', runs(i)); end
+
+
+%%
 
 % Over MC models
 for model = 1:length(mc)
@@ -74,8 +71,6 @@ for level = 1:2
     x_values = M(1:ND:end, INTERCEPT_ind);
     y_values = M(1:ND, DELTAY_ind);
     X = reshape(M(:, COST_ind), [ND ND]);
-    
-    %%
     
     % Interpolated values
     FACTOR = 8; % Interpolation factor, one can change it here
@@ -214,6 +209,3 @@ end % runs
 end % MC models
 
 fclose(fp);
-
-
-
