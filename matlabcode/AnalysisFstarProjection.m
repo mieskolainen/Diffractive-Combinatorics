@@ -17,7 +17,7 @@ run = 274595;
 N = 6; % Vector space dimension
 
 % Fiducial unfolded inelastic in DATA (mb)
-sigma_inel_fiducial = 71.5;
+sigma_inel_fiducial = 71.4;
 
 % Generator level fiducial in MC generators (mb)
 sigma_inel_fiducial_MC = [76 77];
