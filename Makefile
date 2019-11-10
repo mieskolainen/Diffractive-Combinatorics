@@ -19,15 +19,13 @@
 # 
 # cd ~
 # mkdir alice && cd alice
-# aliBuild init
-# aliBuild build AliPhysics --defaults user
-# aliBuild build RooUnfold
-#
+# aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot5
+# 
 # -----------------------------------------------------------------------
 # BASH SETUP
 #
 # ALICE_WORK_DIR=$HOME/alice/sw; eval "`alienv shell-helper`"
-# alienv enter RooUnfold/latest AliPhysics/latest
+# alienv enter AliPhysics/latest
 #
 # USE [TABS] for intendation while modifying this!
 

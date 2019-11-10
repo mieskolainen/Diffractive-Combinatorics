@@ -1,0 +1,16 @@
+Ubuntu 18 alidock INSTALL
+
+1.
+sudo apt install docker.io
+
+2.
+sudo groupadd docker
+sudo usermod -aG docker $USER
+<Restart computer here>
+docker run hello-world
+
+3.
+bash <(curl -fsSL https://raw.githubusercontent.com/alidock/alidock/master/alidock-installer.sh)
+
+4.
+alidock
