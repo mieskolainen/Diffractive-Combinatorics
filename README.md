@@ -28,7 +28,7 @@ mikael.mieskolainen@cern.ch, 2019
 
 In general, one needs to modify Makefile for your local installation. See Makefile for instructions.
 
-#### SETUP
+## SETUP
 
 ### 1. AliPhysics/AliROOT installation (ROOT5 based legacy setup which is tested to work)
 
