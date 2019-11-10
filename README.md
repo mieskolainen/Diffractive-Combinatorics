@@ -30,9 +30,9 @@ In general, one needs to modify Makefile for your local installation. See Makefi
 
 ## SETUP
 
-### 1. AliPhysics/AliROOT installation (ROOT5 based legacy setup which is tested to work)
+### 1. AliPhysics/AliROOT installation (ROOT5 based setup is tested to work)
 
-cd ~
+cd ~ 
 mkdir alice && cd alice
 aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot5
 
