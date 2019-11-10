@@ -299,7 +299,7 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	delete cA;
 	delete cC;
 	delete cE;
-
+	
 	if (!BG_substraction) {
 		printf("Beam-Gas correction OFF \n");
 		scaleA = 0;
@@ -320,11 +320,9 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	cB->Printx();
 
 	// Plotting
-	if (HISTOGRAMS_ON) {
-		cB->Plot();
-		cB->PlotCodingScheme();
-	}
-
+	cB->Plot();
+	cB->PlotCodingScheme();
+	
 	// Add object to the SuperClass
 	AddSource(cB);
 
@@ -344,11 +342,9 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 		// Now generate Bootstrap Sample
 		cObj->GenerateBootStrap();
 
-		// Basic coding
-		if (HISTOGRAMS_ON) {
-			cObj->Plot();
-			cObj->PlotCodingScheme();
-		}
+		// Basic plots
+		cObj->Plot();
+		cObj->PlotCodingScheme();		
 
 		// Add object to the SuperClass
 		AddSource(cObj);
@@ -357,10 +353,8 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 
 
     // Combined plots
-    if (HISTOGRAMS_ON) {
-      PlotAllMatrix();
-      PlotAll1D();
-    }
+    PlotAllMatrix();
+    PlotAll1D();
 
 	return kTRUE;
 }
@@ -653,7 +647,7 @@ Double_t CombinatoricsSuper::Unfold(Int_t Input_index, Int_t Model_index) {
 // Plot all detector distributions
 void CombinatoricsSuper::PlotAll1D() {
 
-	if (HISTOGRAMS_ON) {
+	if (!HISTOGRAMS_ON) { return; }
 
 	printf("CombinatoricsSuper::PlotAll1D:: \n");
 
@@ -686,7 +680,7 @@ void CombinatoricsSuper::PlotAll1D() {
 	}
 
 	// Delete canvases
-	for (UInt_t k = 0; k < can.size(); ++k)
+	for (UInt_t k = 0; k < can.size(); ++k) {
 		delete can[k];
 	}
 
@@ -740,10 +734,11 @@ void CombinatoricsSuper::PlotAll1D() {
 	}
 }
 
+
 // Make ratio coding matrices
 void CombinatoricsSuper::PlotAllMatrix() {
 
-if (HISTOGRAMS_ON) {
+if (!HISTOGRAMS_ON) { return; }
 
 	printf("CombinatoricsSuper::PlotAllMatrix:: \n");
 
@@ -807,10 +802,6 @@ if (HISTOGRAMS_ON) {
 }
 
 
-}
-
-
-
 // Method for creating canvas with "ratio plot" pad1 above, pad2 (ratio)
 //
 //  EXAMPLE:
@@ -848,6 +839,7 @@ void CombinatoricsSuper::ratioplot(TCanvas*& c, TPad*& pad1, TPad*& pad2) {
    pad2->Draw();
 }
 
+
 // Cross Section estimation using
 // Expectation-Maximization (Maximum Marginal Likelihood) iteration
 void CombinatoricsSuper::EstimateEM(Int_t data_index, Int_t MC_index) {
@@ -868,7 +860,7 @@ void CombinatoricsSuper::EstimateEM(Int_t data_index, Int_t MC_index) {
 	XSlevel1.clear();
 	XSlevel2.clear();
 	XSlevel3.clear();
-	
+
 	printf("\n\n======================= Max Likelihood-ESTIMATION =============================\n");
 	printf("Test input: %s, MC model: %s \n", sources_.at(data_index)->GetName().Data(),
 										      sources_.at(MC_index)->GetName().Data());
@@ -1148,9 +1140,6 @@ void CombinatoricsSuper::negLogLfunc(int& npar, double* gin, double& f, double* 
 	//printf("-log(L) = %0.1f \n\n", negLogL);
 	f = negLogL;
 }
-
-
-
 
 // EM subroutine
 std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, Int_t data_index, Int_t MC_index, Bool_t final_round, UInt_t EXTRACTION_LEVEL) {

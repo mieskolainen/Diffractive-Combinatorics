@@ -45,6 +45,9 @@
 #include "CombinatoricsSuper.h"
 #include "Combinatorics.h"
 
+// Libraries
+#include "cxxopts.hpp"
+
 
 // Prototypes
 void SetROOTStyle();
@@ -52,19 +55,73 @@ void SetPlotStyle();
 
 
 // Main
-int main(void) {
+int main(int argc, char* argv[]) {
 
-  printf("\n\n\nCombinatorial Diffractive Cross Section Analysis \n");
-  printf("mikael.mieskolainen@cern.ch, 2019 \n\n\n");
+  cxxopts::Options options("analysis", "Combinatorial Diffractive Cross Section Analysis / mikael.mieskolainen@cern.ch (2019)");
+  options.add_options()
+    ("f,fit",      "Enable Cross Section EM-Fits        <true|false>", cxxopts::value<std::string>())
+    ("t,hist",     "Enable Histogramming                <true|false>", cxxopts::value<std::string>())
+    ("a,trimdata", "Reduced Data Sample Size [0 ... 1]  <double>",     cxxopts::value<double>())
+    ("m,trimmc",   "Reduced MC Sample Size [0 ... 1]    <double>",     cxxopts::value<double>())
+    ("H,help",     "Help")
+    ;
+
+  auto result = options.parse(argc, argv);
+  bool OPT_FIT_ON = false;
+  
+  const std::string example_str = "Example: ./analysis -f false -t false -a 0.1 -m 1.0";
+
+  // Fit on
+  if (result.count("fit")) {
+    const std::string str = result["fit"].as<std::string>();
+    OPT_FIT_ON = (str == "true") ? true : false;
+  } else {
+    std::cout << options.help({""}) << std::endl;
+    std::cout << example_str << std::endl;
+    return EXIT_FAILURE;
+  }
+  
+  // Histogramming on
+  HISTOGRAMS_ON = false;
+  if (result.count("hist")) {
+    const std::string str = result["hist"].as<std::string>();
+    HISTOGRAMS_ON = (str == "true") ? true : false;
+  } else {
+    std::cout << options.help({""}) << std::endl;
+    std::cout << example_str << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // Set maximum fraction [0 ... 1] of data or mc (for speed)
+  MAXEVENTS_DATA = 1.0;
+  MAXEVENTS_MC   = 1.0;
+
+  if (result.count("trimdata")) {
+    MAXEVENTS_DATA = result["trimdata"].as<double>();
+  } else {
+    std::cout << options.help({""}) << std::endl;
+    std::cout << example_str << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (result.count("trimmc")) {
+    MAXEVENTS_MC   = result["trimmc"].as<double>();
+  } else {
+    std::cout << options.help({""}) << std::endl;
+    std::cout << example_str << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // ********************************************************************
   
   // Supress enum MsgLevel { DEBUG=0, INFO=1, PROGRESS=2, WARNING=3, ERROR=4, FATAL=5 };
   gErrorIgnoreLevel = kWarning;
-
+  
   SetROOTStyle();
   SetPlotStyle();
-
+  
   TStopwatch watch;
   watch.Start();
+  
 
   // ********************************************************************
 
@@ -72,10 +129,10 @@ int main(void) {
   const TString base_path   = "/home/user/cernbox/ALICE/diffxsdata";
 
   // Set runs
-  std::vector<UInt_t> runs = {274593};//, 274594, 274595};
+  std::vector<UInt_t> runs = {274593}; //, 274594, 274595};
 
-  // Histogramming on
-  HISTOGRAMS_ON = kFALSE;
+  // ********************************************************************  
+
 
   // VERBOSE PRINTING
   VERBOSE_ON = kFALSE;
@@ -87,10 +144,6 @@ int main(void) {
   GAPFLOW_ON = kFALSE;
   GAPFLOW_N  = 100;         // Discretization
   GAPFLOW_MAXSCALE = 10.0;  // Maximum scale
-
-  // Set maximum fraction [0 ... 1] of data or mc (for speed)
-  MAXEVENTS_DATA = 0.01;
-  MAXEVENTS_MC   = 0.01;
 
   // Skip central diffraction
   SKIP_CD = kTRUE;
@@ -111,7 +164,7 @@ int main(void) {
 
   // Fixed number of EM-iterations in cross section fits (at least 50 is usually enough)
   N_EM_ITER = 50;
-  
+
   // (POMERON DELTA, XIMAX) scans
   SCAN_PARAMETERS = kTRUE;
   MINUIT_ON       = kFALSE;
@@ -142,7 +195,10 @@ int main(void) {
       for (UInt_t model = 1; model <= 2; ++model) {
 
           cSuperObj->Unfold(input, model);
-          cSuperObj->EstimateEM(input, model);
+
+          if (OPT_FIT_ON) {
+            cSuperObj->EstimateEM(input, model);
+          }
       }
     }
     // ===================================================================

@@ -45,6 +45,10 @@
 // Own helper etc. functions
 using namespace VecOper;
 
+
+// ***********************************************************************
+// Default parameters
+
 // -----------------------------------------------------------------------
 // Number of bootstrap samples in EM-cross section fits for non-linear statistical uncertainty
 // Larger number gives better statistical coverage (larger the better, default 300)
@@ -53,17 +57,14 @@ UInt_t N_BOOTSTRAP = 300;
 Bool_t FASTSTAT = kFALSE;
 // -----------------------------------------------------------------------
 
-
 // -----------------------------------------------------------------------
 // Folding matrix construction mode (default 1, PT_MIN = 0.05)
 Int_t FOLDING_MODE = 1;
 Double_t PT_MIN = 0.05;
 // -----------------------------------------------------------------------
 
-
 // Analysis at generator (particle) level (default KFALSE) THIS IS ONLY FOR DEBUG!!
 Bool_t GENERATOR_LEVEL = kFALSE;
-
 
 // -----------------------------------------------------------------------
 // Max number of events (fraction, 0...1, default 1.0)
@@ -72,7 +73,6 @@ Double_t MAXEVENTS_MC   = 1.0;
 // Histogramming/plotting (default kFALSE)
 Bool_t HISTOGRAMS_ON = kFALSE;
 // -----------------------------------------------------------------------
-
 
 // -----------------------------------------------------------------------
 // GAP-FLOW (default KFALSE)
@@ -83,12 +83,12 @@ UInt_t GAPFLOW_N = 100;
 Double_t GAPFLOW_MAXSCALE = 10.0; 
 // -----------------------------------------------------------------------
 
-
 // Skip central diffraction (default kTRUE)
 Bool_t SKIP_CD = kTRUE;
 // Double Diffraction kinematic cutoff mode (default = 0, 1 separate kinematics)
 Int_t DD_XIMAX_MODE = 0;
 
+// ***********************************************************************
 
 
 // Powerlaw fit function: param[0]*1/(x)^(1+param[1])
@@ -258,169 +258,170 @@ Combinatorics::Combinatorics(
 	hxGen   = new TH1D(Form("hxGen_%s_%d", fMCName_.Data(), fRunNumber_),   "Generator level", N_, -0.1, N_-0.1);
 	hxEmpty = new TH1D(Form("hxEmpty_%s_%d", fMCName_.Data(), fRunNumber_), "Empty", N_, -0.1, N_-0.1);
 
+	if (fIsMC_) {
+		// Combinatorial Folding Matrix
+		M = new TH2D(Form("FoldingMatrix_%s_%d", fMCName_.Data(), fRunNumber_), Form("%s;#Omega_{k} (Detector level);#Omega_{k} (Generator level)", fMCName_.Data()), N_, -0.5, N_-1+0.5, N_, -0.5, N_-1+0.5);
+	}
 
-	if (HISTOGRAMS_ON) {
+	// Other histograms
+	if (!HISTOGRAMS_ON) { return; }
 	
-		printf("Combinatorics::Combinatorics:: Initialize histograms..\n");
+	printf("Combinatorics::Combinatorics:: Initialize histograms..\n");
 
-		// Loop over different 2^d combinations
-		for (UInt_t c = 0; c < pow(2,d_); ++c) {
+	// Loop over different 2^d combinations
+	for (UInt_t c = 0; c < pow(2,d_); ++c) {
 
-			hSPDbit[c] = new TH1F(Form("hSPDbit_%d_%s", c, fMCName_.Data()), Form("ID%d : SPD; SPD FiredChip chip number; Counts", c), 1200, 0, 1200);
-			hSPDTR[c] = new TH1F(Form("hSPDTR_%d_%s", c, fMCName_.Data()), Form("ID%d : SPD; Tracklets [#]; Counts", c), 90, 0, 90);
+		hSPDbit[c] = new TH1F(Form("hSPDbit_%d_%s", c, fMCName_.Data()), Form("ID%d : SPD; SPD FiredChip chip number; Counts", c), 1200, 0, 1200);
+		hSPDTR[c] = new TH1F(Form("hSPDTR_%d_%s", c, fMCName_.Data()), Form("ID%d : SPD; Tracklets [#]; Counts", c), 90, 0, 90);
 
+		// Loop over C and A side
+		for (UInt_t k = 0; k < 2; ++k) {
+
+			TString side = "";
+			side = k == 0 ? "C" : "A";
+
+			hSPDFO[c][k] 	= new TH1F(Form("hSPDFO%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d : SPD%s; Fired chips [#]", c, side.Data()), 300, 0, 600);
+
+			hZDN[c][k] 		= new TH1F(Form("hZDN%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDN%s;Signal [A/D-C units];", c, side.Data()), 500, 0, 3500);
+			hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Signal [A/D-C units];", c, side.Data()), 500, 0, 3500);
+
+			hADCharge[c][k] = new TH1F(Form("hADCharge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Charge [A/D-C units];", c, side.Data()), 1536, 0, 6144);
+			hADTime[c][k]   = new TH1F(Form("hADTime%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];", c, side.Data()), 500, 50, 75);
+
+			hV0Charge[c][k] = new TH1F(Form("hV0Charge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Charge [A/D-C units];", c, side.Data()), 512, 0, 1024);
+			hV0Time[c][k]   = new TH1F(Form("hV0Time%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];", c, side.Data()), 500, -5, 20);
+
+			h2ADCT[c][k] 	= new TH2F(Form("h2ADCT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, 50, 75, 200, 0, 6144);
+			h2V0CT[c][k] 	= new TH2F(Form("h2V0CT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, -5, 20, 200, 0, 1024);
+		
+			h2SPDFOTR[c][k] = new TH2F(Form("h2SPDFOTR%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d : SPD%s; Tracklets (full SPD) [#]; Fired chips [#]", c, side.Data()), 100, 0, 100, 100, 0, 100);
+		}
+	}
+
+	// 2D-Cross Correlations
+	std::vector<std::string> det_XC = {"ADC","V0C","SPDC","SPDA","V0A","ADA"};
+	std::vector<std::string> obs_XC = {"Charge","Charge","FiredChip","FiredChip","Charge","Charge"};
+
+	std::vector<Double_t> min_XC = {0, 0, 0, 0, 0, 0};
+	std::vector<Double_t> max_XC = {6144/10.0, 1024/10.0, 600/10.0, 600/10.0, 1024/10.0, 6144/10.0};
+	std::vector<UInt_t> bin_XC   = {120, 120, 120, 120, 120, 120};
+
+
+	// Loop over different 2^d combinations
+	for (UInt_t c = 0; c < pow(2,d_); ++c) {
+
+		// First observable
+		for (Int_t i = 0; i < d_; ++i) {
+
+			// Second observable
+			for (Int_t j = i; j < d_; ++j) {
+
+				h2XC[c][i][j] = new TH2F(Form("h2XC_%d_%d_%d_%s", c, i, j, fMCName_.Data()),
+					Form("ID%d; %s %s; %s %s", c, 
+						det_XC.at(i).c_str(), obs_XC.at(i).c_str(), 
+						det_XC.at(j).c_str(), obs_XC.at(j).c_str()), 
+						bin_XC.at(i), min_XC.at(i), max_XC.at(i), bin_XC.at(j), min_XC.at(j), max_XC.at(j));
+			}
+		}
+	}
+
+
+	// MC Histograms
+	if (fIsMC_) {
+
+		// Left and right diffractive systems
+		for (UInt_t k = 0; k < 2; ++k) {
+			TString side = (k == 0 ? "SDL" : "SDR");
+			TString edge = (k == 0 ? "right" : "left"); // The opposite edge than system dissociation direction
+			
+			hDiffMassSDLowM_gene[k] = new TH1F(Form("hSDDiffLowMGene%d_%s",   k, fMCName_.Data()), Form("%s %s;M^{2}_{X} (GeV^{2});dN/dM^{2}_{X} (events)", fMCName_.Data(), side.Data()), 100, 1.0, 25);
+			hDiffMassSD_gene[k]     = new TH1F(Form("hSDDiffMassGene%d_%s",   k, fMCName_.Data()), Form("%s %s;M^{2}_{X} (GeV^{2});dN/dM^{2}_{X} (events)", fMCName_.Data(), side.Data()), 1000, 1.0, 10000);
+			hDiffDeltaYSD_gene[k]   = new TH1F(Form("hSDDiffDeltaYGene%d_%s", k, fMCName_.Data()), Form("%s %s;System %s #LTY#GT edge;dN/d#LT#DeltaY#GT (events)", fMCName_.Data(), side.Data(), edge.Data()), 50, 0-10, 10);
+		
+			// <observable> as a function of mass
 			// Loop over C and A side
-			for (UInt_t k = 0; k < 2; ++k) {
+			for (UInt_t kk = 0; kk < 2; ++kk) {
 
-				TString side = "";
-				side = k == 0 ? "C" : "A";
-
-				hSPDFO[c][k] 	= new TH1F(Form("hSPDFO%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d : SPD%s; Fired chips [#]", c, side.Data()), 300, 0, 600);
-
-				hZDN[c][k] 		= new TH1F(Form("hZDN%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDN%s;Signal [A/D-C units];", c, side.Data()), 500, 0, 3500);
-				hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Signal [A/D-C units];", c, side.Data()), 500, 0, 3500);
-
-				hADCharge[c][k] = new TH1F(Form("hADCharge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Charge [A/D-C units];", c, side.Data()), 1536, 0, 6144);
-				hADTime[c][k]   = new TH1F(Form("hADTime%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];", c, side.Data()), 500, 50, 75);
-
-				hV0Charge[c][k] = new TH1F(Form("hV0Charge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Charge [A/D-C units];", c, side.Data()), 512, 0, 1024);
-				hV0Time[c][k]   = new TH1F(Form("hV0Time%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];", c, side.Data()), 500, -5, 20);
-
-				h2ADCT[c][k] 	= new TH2F(Form("h2ADCT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, 50, 75, 200, 0, 6144);
-				h2V0CT[c][k] 	= new TH2F(Form("h2V0CT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, -5, 20, 200, 0, 1024);
-			
-				h2SPDFOTR[c][k] = new TH2F(Form("h2SPDFOTR%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d : SPD%s; Tracklets (full SPD) [#]; Fired chips [#]", c, side.Data()), 100, 0, 100, 100, 0, 100);
-			}
-		}
-
-		// 2D-Cross Correlations
-		std::vector<std::string> det_XC = {"ADC","V0C","SPDC","SPDA","V0A","ADA"};
-		std::vector<std::string> obs_XC = {"Charge","Charge","FiredChip","FiredChip","Charge","Charge"};
-
-		std::vector<Double_t> min_XC = {0, 0, 0, 0, 0, 0};
-		std::vector<Double_t> max_XC = {6144/10.0, 1024/10.0, 600/10.0, 600/10.0, 1024/10.0, 6144/10.0};
-		std::vector<UInt_t> bin_XC   = {120, 120, 120, 120, 120, 120};
-
-
-		// Loop over different 2^d combinations
-		for (UInt_t c = 0; c < pow(2,d_); ++c) {
-
-			// First observable
-			for (Int_t i = 0; i < d_; ++i) {
-
-				// Second observable
-				for (Int_t j = i; j < d_; ++j) {
-
-					h2XC[c][i][j] = new TH2F(Form("h2XC_%d_%d_%d_%s", c, i, j, fMCName_.Data()),
-						Form("ID%d; %s %s; %s %s", c, 
-							det_XC.at(i).c_str(), obs_XC.at(i).c_str(), 
-							det_XC.at(j).c_str(), obs_XC.at(j).c_str()), 
-							bin_XC.at(i), min_XC.at(i), max_XC.at(i), bin_XC.at(j), min_XC.at(j), max_XC.at(j));
-				}
-			}
-		}
-	
-
-		// MC Histograms
-		if (fIsMC_) {
-
-			// Combinatorial Folding Matrix
-			M = new TH2D(Form("FoldingMatrix_%s_%d", fMCName_.Data(), fRunNumber_), Form("%s;#Omega_{k} (Detector level);#Omega_{k} (Generator level)", fMCName_.Data()), N_, -0.5, N_-1+0.5, N_, -0.5, N_-1+0.5);
-
-			// Left and right diffractive systems
-			for (UInt_t k = 0; k < 2; ++k) {
-				TString side = (k == 0 ? "SDL" : "SDR");
-				TString edge = (k == 0 ? "right" : "left"); // The opposite edge than system dissociation direction
+				TString CA = "";
+				CA = kk == 0 ? "C" : "A";
+				hAD_M_avgCharge[k][kk]  = new TProfile(Form("hAD_M_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s;log10(M);AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 6144);
+				hV0_M_avgCharge[k][kk]  = new TProfile(Form("hV0_M_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s;log10(M);V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 1024);
+				hSPD_M_avgFO[k][kk]     = new TProfile(Form("hSPD_M_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s;log10(M);SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 600);
+				hZDN_M_avgCharge[k][kk] = new TProfile(Form("hZDN_M_avgCharge%d_%d_%s", k, kk, fMCName_.Data()), Form("%d %s;log10(M);ZDN%s  #LT #SigmaQ #GT (A-D/C units)", fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 3500);
+				hZDP_M_avgCharge[k][kk] = new TProfile(Form("hZDP_M_avgCharge%d_%d_%s", k, kk, fMCName_.Data()), Form("%d %s;log10(M);ZDP%s  #LT #SigmaQ #GT (A-D/C units)", fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 3500);
 				
-				hDiffMassSDLowM_gene[k] = new TH1F(Form("hSDDiffLowMGene%d_%s",   k, fMCName_.Data()), Form("%s %s;M^{2}_{X} (GeV^{2});dN/dM^{2}_{X} (events)", fMCName_.Data(), side.Data()), 100, 1.0, 25);
-				hDiffMassSD_gene[k]     = new TH1F(Form("hSDDiffMassGene%d_%s",   k, fMCName_.Data()), Form("%s %s;M^{2}_{X} (GeV^{2});dN/dM^{2}_{X} (events)", fMCName_.Data(), side.Data()), 1000, 1.0, 10000);
-				hDiffDeltaYSD_gene[k]   = new TH1F(Form("hSDDiffDeltaYGene%d_%s", k, fMCName_.Data()), Form("%s %s;System %s #LTY#GT edge;dN/d#LT#DeltaY#GT (events)", fMCName_.Data(), side.Data(), edge.Data()), 50, 0-10, 10);
-			
-				// <observable> as a function of mass
-				// Loop over C and A side
-				for (UInt_t kk = 0; kk < 2; ++kk) {
-
-					TString CA = "";
-					CA = kk == 0 ? "C" : "A";
-					hAD_M_avgCharge[k][kk]  = new TProfile(Form("hAD_M_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s;log10(M);AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 6144);
-					hV0_M_avgCharge[k][kk]  = new TProfile(Form("hV0_M_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s;log10(M);V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 1024);
-					hSPD_M_avgFO[k][kk]     = new TProfile(Form("hSPD_M_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s;log10(M);SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 600);
-					hZDN_M_avgCharge[k][kk] = new TProfile(Form("hZDN_M_avgCharge%d_%d_%s", k, kk, fMCName_.Data()), Form("%d %s;log10(M);ZDN%s  #LT #SigmaQ #GT (A-D/C units)", fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 3500);
-					hZDP_M_avgCharge[k][kk] = new TProfile(Form("hZDP_M_avgCharge%d_%d_%s", k, kk, fMCName_.Data()), Form("%d %s;log10(M);ZDP%s  #LT #SigmaQ #GT (A-D/C units)", fRunNumber_, side.Data(), CA.Data()), 100, std::log10(1.0), std::log10(SQRTS), 0, 3500);
-					
-					h2AD_M_Charge[k][kk]    = new TH2F(Form("h2AD_M_Charge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);AD%s #SigmaQ (A-D/C units)",  fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 4000);
-					h2V0_M_Charge[k][kk]    = new TH2F(Form("h2V0_M_Charge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);V0%s #SigmaQ (A-D/C units)",  fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 400);
-					h2SPD_M_FO[k][kk]       = new TH2F(Form("h2SPD_M_FO%d_%d_%s", 	  k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);SPD%s FiredChip (#)",  fMCName_.Data(), side.Data(), CA.Data()), 		   100, 1.0, 200, 100, 0, 100);
-					h2ZDN_M_Charge[k][kk]   = new TH2F(Form("h2ZDN_M_Charge%d_%d_%s", k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);ZDN%s #SigmaQ (A-D/C units)", fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 3500);
-					h2ZDP_M_Charge[k][kk]   = new TH2F(Form("h2ZDP_M_Charge%d_%d_%s", k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);ZDP%s #SigmaQ (A-D/C units)", fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 3500);
-				}
-
-				// <observable> as a function of all/charged/neutral particles
-				// Loop over C and A side
-				for (UInt_t kk = 0; kk < 2; ++kk) {
-
-					TString CA = "";
-					CA = kk == 0 ? "C" : "A";
-					hAD_N_avgCharge[k][kk]    = new TProfile(Form("hAD_N_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged + neutral);N_{all};AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 6144);
-					hAD_Nch_avgCharge[k][kk]  = new TProfile(Form("hAD_Nch_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged exclusive);N_{ch};AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 6144);
-					hAD_Nn_avgCharge[k][kk]   = new TProfile(Form("hAD_Nn_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (neutral exclusive);N_{n} ;AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()),   21, 0, 20, 0, 6144);
-					
-					hV0_N_avgCharge[k][kk]    = new TProfile(Form("hV0_N_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged + neutral);N_{};V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 1024);
-					hV0_Nch_avgCharge[k][kk]  = new TProfile(Form("hV0_Nch_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged exclusive);N_{ch};V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 1024);
-					hV0_Nn_avgCharge[k][kk]   = new TProfile(Form("hV0_Nn_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (neutral exclusive);N_{n};V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()),   21, 0, 20, 0, 1024);
-					
-					hSPD_N_avgFO[k][kk]       = new TProfile(Form("hSPD_N_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s (charged + neutral);N_{all};SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()),   21, 0, 20, 0, 600);
-					hSPD_Nch_avgFO[k][kk]     = new TProfile(Form("hSPD_Nch_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s (charged exclusive);N_{ch};SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 600);
-					hSPD_Nn_avgFO[k][kk]      = new TProfile(Form("hSPD_Nn_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s (neutral exclusive);N_{n};SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()),      21, 0, 20, 0, 600);
-					
-					hZDN_Nn_avgCharge[k][kk]  = new TProfile(Form("hZDN_Nn_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s;N_{n};ZDN%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 3500);
-				}
+				h2AD_M_Charge[k][kk]    = new TH2F(Form("h2AD_M_Charge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);AD%s #SigmaQ (A-D/C units)",  fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 4000);
+				h2V0_M_Charge[k][kk]    = new TH2F(Form("h2V0_M_Charge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);V0%s #SigmaQ (A-D/C units)",  fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 400);
+				h2SPD_M_FO[k][kk]       = new TH2F(Form("h2SPD_M_FO%d_%d_%s", 	  k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);SPD%s FiredChip (#)",  fMCName_.Data(), side.Data(), CA.Data()), 		   100, 1.0, 200, 100, 0, 100);
+				h2ZDN_M_Charge[k][kk]   = new TH2F(Form("h2ZDN_M_Charge%d_%d_%s", k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);ZDN%s #SigmaQ (A-D/C units)", fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 3500);
+				h2ZDP_M_Charge[k][kk]   = new TH2F(Form("h2ZDP_M_Charge%d_%d_%s", k, kk, fMCName_.Data()), Form("%s %s;M_{X} (GeV);ZDP%s #SigmaQ (A-D/C units)", fMCName_.Data(), side.Data(), CA.Data()), 100, 1.0, 200, 100, 0, 3500);
 			}
 
+			// <observable> as a function of all/charged/neutral particles
+			// Loop over C and A side
+			for (UInt_t kk = 0; kk < 2; ++kk) {
 
-			// Generated
-			h2DiffMassDD_gene   = new TH2F(Form("h2DDDiffMassGene_%s",  fMCName_.Data()), Form("%s DD;M^{2}_{X} (GeV^{2});M^{2}_{Y} (GeV^{2})", fMCName_.Data()), 50, 1.0, 10000, 50, 1.0, 10000);
-			h1DiffDeltaYDD_gene = new TH1F(Form("h1DDDifDeltaYGene_%s", fMCName_.Data()), Form("%s DD;#LT#DeltaY#GT;dN/d#LT#DeltaY#GT (events)", fMCName_.Data()), 50, 0, 19);
-
-
-			// Different detectors
-			for (Int_t i = 0; i < d_; ++i) {
-
-					// Left and Right systems
-					for (Int_t k = 0; k < 2; ++k) {
-						TString side = (k == 0 ? "SDL" : "SDR");
-						TString edge = (k == 0 ? "right" : "left"); // The opposite edge than system dissociation direction
+				TString CA = "";
+				CA = kk == 0 ? "C" : "A";
+				hAD_N_avgCharge[k][kk]    = new TProfile(Form("hAD_N_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged + neutral);N_{all};AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 6144);
+				hAD_Nch_avgCharge[k][kk]  = new TProfile(Form("hAD_Nch_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged exclusive);N_{ch};AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 6144);
+				hAD_Nn_avgCharge[k][kk]   = new TProfile(Form("hAD_Nn_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (neutral exclusive);N_{n} ;AD%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()),   21, 0, 20, 0, 6144);
 				
-						hDiffMassSD_seen_GEN[i][k]   = new TH1F(Form("hDiffMassSeen_GEN%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;M^{2}_{X} (GeV^{2});Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data()), 1000, 1.0, 10000);
-						hDiffDeltaYSD_seen_GEN[i][k] = new TH1F(Form("hDiffDeltaYSeen_GEN%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;System %s #LTY#GT edge;Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data(), edge.Data()), 50, -10, 10);
-
-						hDiffMassSD_seen_DET[i][k]   = new TH1F(Form("hDiffMassSeen_DET%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;M^{2}_{X} (GeV^{2});Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data()), 1000, 1.0, 10000);
-						hDiffDeltaYSD_seen_DET[i][k] = new TH1F(Form("hDiffDeltaYSeen_DET%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;System %s #LTY#GT edge;Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data(), edge.Data()), 50, -10, 10);
-
-						hDiffMassSD_seen_GEN[i][k]->SetLineColor(46); // Red
-						hDiffDeltaYSD_seen_GEN[i][k]->SetLineColor(46); // Red
-					}
-
-					h2DiffMassDD_seen_GEN[i]   = new TH2F(Form("h2DiffMassSeen_GEN%d_%s", i, fMCName_.Data()), Form("%s DD - %s Efficiency;M^{2}_{X} (GeV^{2});M^{2}_{Y} (GeV^{2})", fMCName_.Data(), det_labels_[i].Data()), 50, 1.0, 10000, 50, 1.0, 10000);
-					h1DiffDeltaYDD_seen_GEN[i] = new TH1F(Form("h1DiffDeltaYSeen_GEN%d_%s", i, fMCName_.Data()), Form("%s DD - %s;#LT#DeltaY#GT; Efficiency", fMCName_.Data(), det_labels_[i].Data()), 50, 0, 19);
-
-					h2DiffMassDD_seen_DET[i]   = new TH2F(Form("h2DiffMassSeen_DET%d_%s", i, fMCName_.Data()), Form("%s DD - %s Efficiency;M^{2}_{X} (GeV^{2});M^{2}_{Y} (GeV^{2})", fMCName_.Data(), det_labels_[i].Data()), 50, 1.0, 10000, 50, 1.0, 10000);
-					h1DiffDeltaYDD_seen_DET[i] = new TH1F(Form("h1DiffDeltaYSeen_DET%d_%s", i, fMCName_.Data()), Form("%s DD - %s;#LT#DeltaY#GT; Efficiency", fMCName_.Data(), det_labels_[i].Data()), 50, 0, 19);
-
-					// Error saving
-					/*
-					hDiffMass_gen[i]->Sumw2();
-					hDiffMass_seen[i]->Sumw2();
-
-					hDiffMass_seen_ADC[i]->Sumw2();
-					hDiffMass_seen_ADA[i]->Sumw2();
-
-					hDiffMass_seen_V0C[i]->Sumw2();
-					hDiffMass_seen_V0A[i]->Sumw2();
-					*/
+				hV0_N_avgCharge[k][kk]    = new TProfile(Form("hV0_N_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged + neutral);N_{};V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 1024);
+				hV0_Nch_avgCharge[k][kk]  = new TProfile(Form("hV0_Nch_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (charged exclusive);N_{ch};V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 1024);
+				hV0_Nn_avgCharge[k][kk]   = new TProfile(Form("hV0_Nn_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s (neutral exclusive);N_{n};V0%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()),   21, 0, 20, 0, 1024);
+				
+				hSPD_N_avgFO[k][kk]       = new TProfile(Form("hSPD_N_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s (charged + neutral);N_{all};SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()),   21, 0, 20, 0, 600);
+				hSPD_Nch_avgFO[k][kk]     = new TProfile(Form("hSPD_Nch_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s (charged exclusive);N_{ch};SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 600);
+				hSPD_Nn_avgFO[k][kk]      = new TProfile(Form("hSPD_Nn_avgFO%d_%d_%s", 	k, kk, fMCName_.Data()), Form("%d %s (neutral exclusive);N_{n};SPD%s  #LT FiredChip #GT (#)",            fRunNumber_, side.Data(), CA.Data()),      21, 0, 20, 0, 600);
+				
+				hZDN_Nn_avgCharge[k][kk]  = new TProfile(Form("hZDN_Nn_avgCharge%d_%d_%s",  k, kk, fMCName_.Data()), Form("%d %s;N_{n};ZDN%s  #LT #SigmaQ #GT (A-D/C units)",  fRunNumber_, side.Data(), CA.Data()), 21, 0, 20, 0, 3500);
 			}
 		}
-	} // Histograms on
+
+
+		// Generated
+		h2DiffMassDD_gene   = new TH2F(Form("h2DDDiffMassGene_%s",  fMCName_.Data()), Form("%s DD;M^{2}_{X} (GeV^{2});M^{2}_{Y} (GeV^{2})", fMCName_.Data()), 50, 1.0, 10000, 50, 1.0, 10000);
+		h1DiffDeltaYDD_gene = new TH1F(Form("h1DDDifDeltaYGene_%s", fMCName_.Data()), Form("%s DD;#LT#DeltaY#GT;dN/d#LT#DeltaY#GT (events)", fMCName_.Data()), 50, 0, 19);
+
+
+		// Different detectors
+		for (Int_t i = 0; i < d_; ++i) {
+
+				// Left and Right systems
+				for (Int_t k = 0; k < 2; ++k) {
+					TString side = (k == 0 ? "SDL" : "SDR");
+					TString edge = (k == 0 ? "right" : "left"); // The opposite edge than system dissociation direction
+			
+					hDiffMassSD_seen_GEN[i][k]   = new TH1F(Form("hDiffMassSeen_GEN%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;M^{2}_{X} (GeV^{2});Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data()), 1000, 1.0, 10000);
+					hDiffDeltaYSD_seen_GEN[i][k] = new TH1F(Form("hDiffDeltaYSeen_GEN%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;System %s #LTY#GT edge;Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data(), edge.Data()), 50, -10, 10);
+
+					hDiffMassSD_seen_DET[i][k]   = new TH1F(Form("hDiffMassSeen_DET%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;M^{2}_{X} (GeV^{2});Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data()), 1000, 1.0, 10000);
+					hDiffDeltaYSD_seen_DET[i][k] = new TH1F(Form("hDiffDeltaYSeen_DET%d_%d_%s", i, k, fMCName_.Data()), Form("%s : %s Process %s;System %s #LTY#GT edge;Fiducial Acceptance (red), Detector level Eff x Acc (blue)", det_labels_[i].Data(), fMCName_.Data(), side.Data(), edge.Data()), 50, -10, 10);
+
+					hDiffMassSD_seen_GEN[i][k]->SetLineColor(46); // Red
+					hDiffDeltaYSD_seen_GEN[i][k]->SetLineColor(46); // Red
+				}
+
+				h2DiffMassDD_seen_GEN[i]   = new TH2F(Form("h2DiffMassSeen_GEN%d_%s", i, fMCName_.Data()), Form("%s DD - %s Efficiency;M^{2}_{X} (GeV^{2});M^{2}_{Y} (GeV^{2})", fMCName_.Data(), det_labels_[i].Data()), 50, 1.0, 10000, 50, 1.0, 10000);
+				h1DiffDeltaYDD_seen_GEN[i] = new TH1F(Form("h1DiffDeltaYSeen_GEN%d_%s", i, fMCName_.Data()), Form("%s DD - %s;#LT#DeltaY#GT; Efficiency", fMCName_.Data(), det_labels_[i].Data()), 50, 0, 19);
+
+				h2DiffMassDD_seen_DET[i]   = new TH2F(Form("h2DiffMassSeen_DET%d_%s", i, fMCName_.Data()), Form("%s DD - %s Efficiency;M^{2}_{X} (GeV^{2});M^{2}_{Y} (GeV^{2})", fMCName_.Data(), det_labels_[i].Data()), 50, 1.0, 10000, 50, 1.0, 10000);
+				h1DiffDeltaYDD_seen_DET[i] = new TH1F(Form("h1DiffDeltaYSeen_DET%d_%s", i, fMCName_.Data()), Form("%s DD - %s;#LT#DeltaY#GT; Efficiency", fMCName_.Data(), det_labels_[i].Data()), 50, 0, 19);
+
+				// Error saving
+				/*
+				hDiffMass_gen[i]->Sumw2();
+				hDiffMass_seen[i]->Sumw2();
+
+				hDiffMass_seen_ADC[i]->Sumw2();
+				hDiffMass_seen_ADA[i]->Sumw2();
+
+				hDiffMass_seen_V0C[i]->Sumw2();
+				hDiffMass_seen_V0A[i]->Sumw2();
+				*/
+		}
+	}
 
 }
 
@@ -1491,425 +1492,446 @@ void Combinatorics::Plot1DB(std::vector<TCanvas*>& can, UInt_t color, UInt_t mar
 void Combinatorics::Plot() {
 
 	// THIS IS ALWAYS PLOTTED
-	// Folding matrix
+	// Folding matrix visualized
 	if (fIsMC_) {
 
-		TCanvas* ccc = new TCanvas(Form("cM%s",fMCName_.Data()), "cM", 400, 400);
+		TCanvas* ccc = new TCanvas(Form("cM%s",fMCName_.Data()), "cM", 3000, 3000);
 		ccc->cd();
 		gPad->SetLogz(1);
 
 		// Set X-axis tick divisions
-		const Int_t n1 = 14;  // Primary divisions
-		const Int_t n2 = 5;   // Secondary divisions
-		const Int_t n = n1 + 100*n2;
+		const Int_t n1 = 14;          // Primary divisions
+		const Int_t n2 = 5;           // Secondary divisions
+		const Int_t n  = n1 + 100*n2; 
 
 		M->GetXaxis()->SetNdivisions(n);
 		M->GetYaxis()->SetNdivisions(n);
-
 		M->Draw("COLZ");
+
 		ccc->Print(Form("./figures_xsec/%d/Unfolding/FoldingMatrix_%s.pdf", fRunNumber_, fMCName_.Data()));
 		delete ccc;
-	}
-	
 
+		FILE* fp;
+		fp = fopen(Form("./figures_xsec/%d/Unfolding/FoldingMatrix_%s.csv", fRunNumber_, fMCName_.Data()), "w");
+ 		
+ 		// --------------------------------------------------------------
+		// Print out the raw numbers for external analysis
 
-	if (HISTOGRAMS_ON) {
-
-		printf("Combinatorics::Plot:: \n");
-
-	   	// The number of elements in the vector space
-	   	const UInt_t ncomb = (UInt_t) std::pow(2,d_);
-
-	   	for (UInt_t c = 0; c < ncomb; ++c) {
-			TCanvas* cSPD = new TCanvas(Form("cSPD_ID%d_%s",c,fMCName_.Data()), Form("hSPD_%d",c), 400, 300);
-			cSPD->cd();
-			cSPD->SetLogy();
-			hSPDbit[c]->Draw();
-
-			cSPD->Print(Form("./figures_xsec/%d/SPD/%s/SPD_ID%03u.pdf", fRunNumber_, fMCName_.Data(), c));
-			delete cSPD;
-		}
-
-
-	   	// 2D-cross correlations
-
-	   	// -------------------------------------------------------------------
-	   	// Create canvases
-
-	   	std::vector<TCanvas*> c2DXC(ncomb, NULL);
-
-	   	for (UInt_t c = 0; c < ncomb; ++c) {
-			c2DXC[c] = new TCanvas(Form("c2DXC_ID%d_%s",c,fMCName_.Data()), Form("h2Det_%d",c), 1200, 1200);
-			c2DXC[c]->Divide(d_,d_); 			  // (horizontal, vertical) boxes
-		}
-
-		// 2D histograms
-		// Loop over combinations
-		for (UInt_t c = 0; c < ncomb; ++c) {
-			UInt_t k = 1;
-
-			// Get corresponding vector
-			std::vector<Bool_t> boolvec = Ind2Vec(c, d_);
-
-			for (Int_t i = 0; i < d_; ++i) {
-				for (Int_t j = 0; j < d_; ++j) {
-
-					if (j >= i) { // Plot only diagonal and upper right diagonal
-
-						c2DXC[c]->cd(k);//->SetLogx();
-						
-						// Coloring
-							Double_t color = (boolvec.at(i) == 1 && boolvec.at(j) == 1) ? kWhite : kGray;
-							gPad->SetFillColor(color);
-
-						// Pearson Cross Correlation
-						Double_t xcorr = h2XC[c][i][j]->GetCorrelationFactor();
-						h2XC[c][i][j]->SetTitle(Form("ID: %d, #rho = %0.2f", c, xcorr));					
-	   					h2XC[c][i][j]->Draw("COLZ");
-					}
-					++k;
+		for (UInt_t i = 1; i <= (UInt_t) std::pow(2,d_); ++i) { // Note indexing starts at 1
+			for (UInt_t j = 1; j <= (UInt_t) std::pow(2,d_); ++j) { // Note indexing starts at 1
+				UInt_t value = M->GetBinContent(i,j);
+				if (j < std::pow(2,d_)) {
+					fprintf(fp, "%u,", value);
+				} else {
+					fprintf(fp, "%u", value);
 				}
 			}
-
-			c2DXC[c]->Print(Form("./figures_xsec/%d/XC/%s/Vector_ID%03u.pdf", fRunNumber_, fMCName_.Data(), c));
+			fprintf(fp, "\n");
 		}
 
-	   	// -------------------------------------------------------------------
-	   	// Create canvases
+		// Close the file
+   		fclose(fp);
+ 		// --------------------------------------------------------------
+	}
 
-	   	std::vector<TCanvas*> c2D(ncomb, NULL);
 
-	   	for (UInt_t c = 0; c < ncomb; ++c) {
-			c2D[c] = new TCanvas(Form("c2D_ID%d_%s",c,fMCName_.Data()), Form("h2Det_%d",c), 1200, 200);
-			c2D[c]->Divide(d_,1); 			  // (horizontal, vertical) boxes
-		}
+	if (!HISTOGRAMS_ON) { return; }
 
-		// 2D histograms
-		// Loop over combinations
-		for (UInt_t c = 0; c < ncomb; ++c) {
+	printf("Combinatorics::Plot:: \n");
 
-			// Get corresponding vector
-			std::vector<Bool_t> boolvec = Ind2Vec(c, d_);
+   	// The number of elements in the vector space
+   	const UInt_t ncomb = (UInt_t) std::pow(2,d_);
 
-			// Loop over C and A-side
-			for (UInt_t k = 0; k < 2; ++k) {
+   	for (UInt_t c = 0; c < ncomb; ++c) {
+		TCanvas* cSPD = new TCanvas(Form("cSPD_ID%d_%s",c,fMCName_.Data()), Form("hSPD_%d",c), 400, 300);
+		cSPD->cd();
+		cSPD->SetLogy();
+		hSPDbit[c]->Draw();
 
-				c2D[c]->cd(AD_ind_[k]+1)->SetLogy();
-				h2ADCT[c][k]->Draw("COLZ");
+		cSPD->Print(Form("./figures_xsec/%d/SPD/%s/SPD_ID%03u.pdf", fRunNumber_, fMCName_.Data(), c));
+		delete cSPD;
+	}
 
-				c2D[c]->cd(V0_ind_[k]+1)->SetLogy();
-				h2V0CT[c][k]->Draw("COLZ");
-				
-				c2D[c]->cd(SPD_ind_[k]+1);//->SetLogx();
-				h2SPDFOTR[c][k]->Draw("COLZ");
+
+   	// 2D-cross correlations
+
+   	// -------------------------------------------------------------------
+   	// Create canvases
+
+   	std::vector<TCanvas*> c2DXC(ncomb, NULL);
+
+   	for (UInt_t c = 0; c < ncomb; ++c) {
+		c2DXC[c] = new TCanvas(Form("c2DXC_ID%d_%s",c,fMCName_.Data()), Form("h2Det_%d",c), 1200, 1200);
+		c2DXC[c]->Divide(d_,d_); 			  // (horizontal, vertical) boxes
+	}
+
+	// 2D histograms
+	// Loop over combinations
+	for (UInt_t c = 0; c < ncomb; ++c) {
+		UInt_t k = 1;
+
+		// Get corresponding vector
+		std::vector<Bool_t> boolvec = Ind2Vec(c, d_);
+
+		for (Int_t i = 0; i < d_; ++i) {
+			for (Int_t j = 0; j < d_; ++j) {
+
+				if (j >= i) { // Plot only diagonal and upper right diagonal
+
+					c2DXC[c]->cd(k);//->SetLogx();
+					
+					// Coloring
+						Double_t color = (boolvec.at(i) == 1 && boolvec.at(j) == 1) ? kWhite : kGray;
+						gPad->SetFillColor(color);
+
+					// Pearson Cross Correlation
+					Double_t xcorr = h2XC[c][i][j]->GetCorrelationFactor();
+					h2XC[c][i][j]->SetTitle(Form("ID: %d, #rho = %0.2f", c, xcorr));					
+   					h2XC[c][i][j]->Draw("COLZ");
+				}
+				++k;
 			}
-
-
-			// Fill backgrounds for visualization
-			for (Int_t k = 0; k < d_; ++k) {
-
-				Double_t color = boolvec.at(k) == 1 ? kWhite : kGray;
-				c2D[c]->cd(k+1); gPad->SetFillColor(color);
-
-			}
-			// Save PDFs
-			c2D[c]->Print(Form("./figures_xsec/%d/Detector_2D/%s/Vector_ID%03u.pdf", fRunNumber_, fMCName_.Data(), c));
 		}
+
+		c2DXC[c]->Print(Form("./figures_xsec/%d/XC/%s/Vector_ID%03u.pdf", fRunNumber_, fMCName_.Data(), c));
+	}
+
+   	// -------------------------------------------------------------------
+   	// Create canvases
+
+   	std::vector<TCanvas*> c2D(ncomb, NULL);
+
+   	for (UInt_t c = 0; c < ncomb; ++c) {
+		c2D[c] = new TCanvas(Form("c2D_ID%d_%s",c,fMCName_.Data()), Form("h2Det_%d",c), 1200, 200);
+		c2D[c]->Divide(d_,1); 			  // (horizontal, vertical) boxes
+	}
+
+	// 2D histograms
+	// Loop over combinations
+	for (UInt_t c = 0; c < ncomb; ++c) {
+
+		// Get corresponding vector
+		std::vector<Bool_t> boolvec = Ind2Vec(c, d_);
+
+		// Loop over C and A-side
+		for (UInt_t k = 0; k < 2; ++k) {
+
+			c2D[c]->cd(AD_ind_[k]+1)->SetLogy();
+			h2ADCT[c][k]->Draw("COLZ");
+
+			c2D[c]->cd(V0_ind_[k]+1)->SetLogy();
+			h2V0CT[c][k]->Draw("COLZ");
+			
+			c2D[c]->cd(SPD_ind_[k]+1);//->SetLogx();
+			h2SPDFOTR[c][k]->Draw("COLZ");
+		}
+
+
+		// Fill backgrounds for visualization
+		for (Int_t k = 0; k < d_; ++k) {
+
+			Double_t color = boolvec.at(k) == 1 ? kWhite : kGray;
+			c2D[c]->cd(k+1); gPad->SetFillColor(color);
+
+		}
+		// Save PDFs
+		c2D[c]->Print(Form("./figures_xsec/%d/Detector_2D/%s/Vector_ID%03u.pdf", fRunNumber_, fMCName_.Data(), c));
+	}
 
 /*
-		// 2D-MC <observable> versus mass
-		if (fIsMC_) {
-			TCanvas* cxAD  = new TCanvas(Form("cxAD_%s",  fMCName_.Data()), "h2-AD",  500, 400); cxAD->Divide(2,2);
-			TCanvas* cxV0  = new TCanvas(Form("cxV0_%s",  fMCName_.Data()), "h2-V0",  500, 400); cxV0->Divide(2,2);
-			TCanvas* cxSPD = new TCanvas(Form("cxSPD_%s", fMCName_.Data()), "h2-SPD", 500, 400); cxSPD->Divide(2,2);
-			TCanvas* cxZDN = new TCanvas(Form("cxZDN_%s", fMCName_.Data()), "h2-ZDN", 500, 400); cxZDN->Divide(2,2);
-			TCanvas* cxZDP = new TCanvas(Form("cxZDP_%s", fMCName_.Data()), "h2-ZDP", 500, 400); cxZDP->Divide(2,2);
+	// 2D-MC <observable> versus mass
+	if (fIsMC_) {
+		TCanvas* cxAD  = new TCanvas(Form("cxAD_%s",  fMCName_.Data()), "h2-AD",  500, 400); cxAD->Divide(2,2);
+		TCanvas* cxV0  = new TCanvas(Form("cxV0_%s",  fMCName_.Data()), "h2-V0",  500, 400); cxV0->Divide(2,2);
+		TCanvas* cxSPD = new TCanvas(Form("cxSPD_%s", fMCName_.Data()), "h2-SPD", 500, 400); cxSPD->Divide(2,2);
+		TCanvas* cxZDN = new TCanvas(Form("cxZDN_%s", fMCName_.Data()), "h2-ZDN", 500, 400); cxZDN->Divide(2,2);
+		TCanvas* cxZDP = new TCanvas(Form("cxZDP_%s", fMCName_.Data()), "h2-ZDP", 500, 400); cxZDP->Divide(2,2);
 
-			Int_t kk = 1;
-			for (Int_t i = 0; i < 2; ++i) {
-				for (Int_t j = 0; j < 2; ++j) {
-					
-					cxAD->cd(kk);  cxAD->cd(kk)->SetLogx();  cxAD->cd(kk)->SetLogy();
-					h2AD_M_Charge[i][j]->Draw();
-					
-					cxV0->cd(kk);  cxV0->cd(kk)->SetLogx();  cxV0->cd(kk)->SetLogy();
-					h2V0_M_Charge[i][j]->Draw();
-					
-					cxSPD->cd(kk); cxSPD->cd(kk)->SetLogx(); cxSPD->cd(kk)->SetLogy();
-					h2SPD_M_FO[i][j]->Draw();
-					
-					cxZDN->cd(kk); cxZDN->cd(kk)->SetLogx(); cxZDN->cd(kk)->SetLogy();
-					h2ZDN_M_Charge[i][j]->Draw();
+		Int_t kk = 1;
+		for (Int_t i = 0; i < 2; ++i) {
+			for (Int_t j = 0; j < 2; ++j) {
+				
+				cxAD->cd(kk);  cxAD->cd(kk)->SetLogx();  cxAD->cd(kk)->SetLogy();
+				h2AD_M_Charge[i][j]->Draw();
+				
+				cxV0->cd(kk);  cxV0->cd(kk)->SetLogx();  cxV0->cd(kk)->SetLogy();
+				h2V0_M_Charge[i][j]->Draw();
+				
+				cxSPD->cd(kk); cxSPD->cd(kk)->SetLogx(); cxSPD->cd(kk)->SetLogy();
+				h2SPD_M_FO[i][j]->Draw();
+				
+				cxZDN->cd(kk); cxZDN->cd(kk)->SetLogx(); cxZDN->cd(kk)->SetLogy();
+				h2ZDN_M_Charge[i][j]->Draw();
 
-					cxZDP->cd(kk); cxZDP->cd(kk)->SetLogx(); cxZDP->cd(kk)->SetLogy();
-					h2ZDP_M_Charge[i][j]->Draw();
+				cxZDP->cd(kk); cxZDP->cd(kk)->SetLogx(); cxZDP->cd(kk)->SetLogy();
+				h2ZDP_M_Charge[i][j]->Draw();
 
-					++kk;
-				}
+				++kk;
 			}
-			cxAD->Print(Form("./figures_xsec/%d/Detector/cx2D_AD_%s.pdf",   fRunNumber_, fMCName_.Data() ));
-			cxV0->Print(Form("./figures_xsec/%d/Detector/cx2D_V0_%s.pdf",   fRunNumber_, fMCName_.Data() ));
-			cxSPD->Print(Form("./figures_xsec/%d/Detector/cx2D_SPD_%s.pdf", fRunNumber_, fMCName_.Data() ));
-			cxZDN->Print(Form("./figures_xsec/%d/Detector/cx2D_ZDN_%s.pdf", fRunNumber_, fMCName_.Data() ));
-			cxZDP->Print(Form("./figures_xsec/%d/Detector/cx2D_ZDP_%s.pdf", fRunNumber_, fMCName_.Data() ));
-
-
-			delete cxAD;
-			delete cxV0;
-			delete cxSPD;
-			delete cxZDN;
-			delete cxZDP;	
 		}
+		cxAD->Print(Form("./figures_xsec/%d/Detector/cx2D_AD_%s.pdf",   fRunNumber_, fMCName_.Data() ));
+		cxV0->Print(Form("./figures_xsec/%d/Detector/cx2D_V0_%s.pdf",   fRunNumber_, fMCName_.Data() ));
+		cxSPD->Print(Form("./figures_xsec/%d/Detector/cx2D_SPD_%s.pdf", fRunNumber_, fMCName_.Data() ));
+		cxZDN->Print(Form("./figures_xsec/%d/Detector/cx2D_ZDN_%s.pdf", fRunNumber_, fMCName_.Data() ));
+		cxZDP->Print(Form("./figures_xsec/%d/Detector/cx2D_ZDP_%s.pdf", fRunNumber_, fMCName_.Data() ));
+
+
+		delete cxAD;
+		delete cxV0;
+		delete cxSPD;
+		delete cxZDN;
+		delete cxZDP;	
+	}
 */
 
-		TCanvas* c5 = new TCanvas(Form("c5_%s",fMCName_.Data()), "DiffMassDD", 230, 500);
-		c5->Divide(1,2);
+	TCanvas* c5 = new TCanvas(Form("c5_%s",fMCName_.Data()), "DiffMassDD", 230, 500);
+	c5->Divide(1,2);
 
 
-		TCanvas* c7 = new TCanvas(Form("c7_%s",fMCName_.Data()), "DiffDeltaYDD", 230, 500);
-		c7->Divide(1,2);
+	TCanvas* c7 = new TCanvas(Form("c7_%s",fMCName_.Data()), "DiffDeltaYDD", 230, 500);
+	c7->Divide(1,2);
 
 
-		// FIT object for fitting the MC invariant mass squared histograms
-		// FIT dsigma/dm^2 ~ 1/(m^2)^(1+POMERON_DELTA), here m^2 = x
+	// FIT object for fitting the MC invariant mass squared histograms
+	// FIT dsigma/dm^2 ~ 1/(m^2)^(1+POMERON_DELTA), here m^2 = x
 
-		// HIGH_MASS fit
-		TF1* M2fit = new TF1("M2fit",Reggefit, 10, 10000, 2); // 2 parameters
-		M2fit->SetParameters(1, 1); // Initial values
-		M2fit->SetParName(0,"C0");
-		M2fit->SetParName(1,"POMERON_DELTA");
+	// HIGH_MASS fit
+	TF1* M2fit = new TF1("M2fit",Reggefit, 10, 10000, 2); // 2 parameters
+	M2fit->SetParameters(1, 1); // Initial values
+	M2fit->SetParName(0,"C0");
+	M2fit->SetParName(1,"POMERON_DELTA");
 
-		// LOW-MASS fit
-		TF1* M2Lowfit = new TF1("M2Lowfit",Reggefit, 2.5, 25, 2); // 2 parameters
-		M2Lowfit->SetParameters(1, 1); // Initial values
-		M2Lowfit->SetParName(0,"C0");
-		M2Lowfit->SetParName(1,"POMERON_DELTA");
+	// LOW-MASS fit
+	TF1* M2Lowfit = new TF1("M2Lowfit",Reggefit, 2.5, 25, 2); // 2 parameters
+	M2Lowfit->SetParameters(1, 1); // Initial values
+	M2Lowfit->SetParName(0,"C0");
+	M2Lowfit->SetParName(1,"POMERON_DELTA");
 
-		// MC only, Mass histograms
-		if (fIsMC_ && !fMCName_.Contains("EPOS-LHC")) {
+	// MC only, Mass histograms
+	if (fIsMC_ && !fMCName_.Contains("EPOS-LHC")) {
 
-			TCanvas* ccx = new TCanvas(Form("ccx_%s",fMCName_.Data()), "SDMass", 500, 280);
-			ccx->Divide(2,1);
-			TLegend legW2[2] = {TLegend(0.35,0.73, 0.82,0.87), TLegend(0.35,0.73, 0.82,0.87)};
+		TCanvas* ccx = new TCanvas(Form("ccx_%s",fMCName_.Data()), "SDMass", 500, 280);
+		ccx->Divide(2,1);
+		TLegend legW2[2] = {TLegend(0.35,0.73, 0.82,0.87), TLegend(0.35,0.73, 0.82,0.87)};
 
-			for (UInt_t kk = 0; kk < 2; ++kk) {
-				ccx->cd(kk+1);
+		for (UInt_t kk = 0; kk < 2; ++kk) {
+			ccx->cd(kk+1);
 
-				hDiffMassSDLowM_gene[kk]->Fit("M2Lowfit","ER"); // "E" minos errors, R" restricts the fit
-				hDiffMassSDLowM_gene[kk]->Draw();
+			hDiffMassSDLowM_gene[kk]->Fit("M2Lowfit","ER"); // "E" minos errors, R" restricts the fit
+			hDiffMassSDLowM_gene[kk]->Draw();
 
-				// legend (x1,y1, x2, y2) with FIT values
-				legW2[kk].AddEntry(M2Lowfit, Form("C x 1/(M^{2})^{1+#Delta}, #Delta = %0.2f #pm %0.2f",
-					M2Lowfit->GetParameter(1), M2Lowfit->GetParError(1)), "l");
-				legW2[kk].SetBorderSize(0);
-				legW2[kk].SetTextSize(0.03);
-				legW2[kk].Draw();
-			}
-
-			ccx->SaveAs(Form("./figures_xsec/%d/Acceptance/SDLowM_%s.pdf", fRunNumber_, fMCName_.Data()) );
-			delete ccx;
-
-
-			TCanvas* ccx2 = new TCanvas(Form("ccx2_%s",fMCName_.Data()), "SDMass", 500, 280);
-			ccx2->Divide(2,1);
-			TLegend legW22[2] = {TLegend(0.45,0.73, 0.82,0.87), TLegend(0.45,0.73, 0.82,0.87)};
-			
-			for (UInt_t kk = 0; kk < 2; ++kk) {
-				ccx2->cd(kk+1);
-				ccx2->cd(kk+1)->SetLogy();
-				ccx2->cd(kk+1)->SetLogx();
-
-				hDiffMassSD_gene[kk]->Fit("M2fit","ER"); // "E" minos errors, R" restricts the fit
-				hDiffMassSD_gene[kk]->Draw();
-
-				// legend (x1,y1, x2, y2) with FIT values
-				legW22[kk].AddEntry(M2fit, Form("C x 1/(M^{2})^{1+#Delta}, #Delta = %0.2f #pm %0.2f",
-					M2fit->GetParameter(1), M2fit->GetParError(1)), "l");
-				legW22[kk].SetBorderSize(0);
-				legW22[kk].SetTextSize(0.03);
-				legW22[kk].Draw();
-			}
-
-			ccx2->SaveAs(Form("./figures_xsec/%d/Acceptance/SDHighM_%s.pdf", fRunNumber_, fMCName_.Data()) );
-			delete ccx2;
-
-
-			// ----------------------------------------------------------	
-			// Efficiency simulations >>
-
-			for (Int_t side = 0; side < 2; ++side) {
-				// Fit
-   				hDiffMassSD_gene[side]->Fit("M2fit","ER"); // "E" minos errors, R" restricts the fit
-			}
-
-
-			// Loop over detectors >>
-
-			// Calculate efficiencies
-			for (Int_t i = 0; i < d_; ++i) {
-
-				// Loop over C and A sides
-				for (Int_t side = 0; side < 2; ++side) {
-
-					// Calculate the efficiency by dividing with generated
-					hDiffMassSD_seen_GEN[i][side]->Divide(hDiffMassSD_gene[side]);
-					hDiffMassSD_seen_DET[i][side]->Divide(hDiffMassSD_gene[side]);
-
-					hDiffMassSD_seen_GEN[i][side]->SetMaximum(1.0);
-					hDiffMassSD_seen_DET[i][side]->SetMaximum(1.0);
-					hDiffMassSD_seen_GEN[i][side]->SetMinimum(0.0);
-					hDiffMassSD_seen_DET[i][side]->SetMinimum(0.0);
-
-					// Calculate the efficiency by dividing with generated
-					hDiffDeltaYSD_seen_GEN[i][side]->Divide(hDiffDeltaYSD_gene[side]);
-					hDiffDeltaYSD_seen_DET[i][side]->Divide(hDiffDeltaYSD_gene[side]);
-
-					hDiffDeltaYSD_seen_GEN[i][side]->SetMaximum(1.0);
-					hDiffDeltaYSD_seen_DET[i][side]->SetMaximum(1.0);
-					hDiffDeltaYSD_seen_GEN[i][side]->SetMinimum(0.0);
-					hDiffDeltaYSD_seen_DET[i][side]->SetMinimum(0.0);
-				}
-			}
-
-
-			// Loop over detectors
-			TCanvas* c4 = new TCanvas(Form("c4_%s",fMCName_.Data()), "DiffMassSD", 300, 800);
-			c4->Divide(2,d_);
-			Int_t kk = 1;
-			for (Int_t i = 0; i < d_; ++i) {
-
-				// Loop over SDL and SDR
-				for (Int_t side = 0; side < 2; ++side) {
-
-					c4->cd(kk)->SetLogx(); 
-					hDiffMassSD_seen_GEN[i][side]->Draw("SAME");
-					hDiffMassSD_seen_DET[i][side]->Draw("SAME");
-					++kk;
-				}
-			}
-			c4->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_Mass_Vertical.pdf", fRunNumber_, fMCName_.Data() ));
-			delete c4;
-
-			// Loop over SDL and SDR
-			TCanvas* c44 = new TCanvas(Form("c44_%s",fMCName_.Data()), "DiffMassSD", 1000, 300);
-			c44->Divide(d_,2);
-			kk = 1;
-			for (Int_t side = 0; side < 2; ++side) {
-
-				// Loop over detectors
-				for (Int_t i = 0; i < d_; ++i) {
-
-					c44->cd(kk)->SetLogx(); 
-					hDiffMassSD_seen_GEN[i][side]->Draw("SAME");
-					hDiffMassSD_seen_DET[i][side]->Draw("SAME");
-					++kk;
-				}
-			}
-			c44->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_Mass_Horizontal.pdf", fRunNumber_, fMCName_.Data() ));
-			delete c44;
-
-			/*
-			// Regge-Mass distributions
-			c4->cd(side+3)->SetLogy();
-			c4->cd(side+3)->SetLogx();
-			hDiffMassSD_gene[side]->Draw();	
-	
 			// legend (x1,y1, x2, y2) with FIT values
-			TLegend legW = TLegend(0.5,0.73, 0.82,0.87);
-			legW.AddEntry(M2fit, Form("C x 1/(M^{2})^{1+#epsilon}, #epsilon = %0.2f #pm %0.2f",
+			legW2[kk].AddEntry(M2Lowfit, Form("C x 1/(M^{2})^{1+#Delta}, #Delta = %0.2f #pm %0.2f",
+				M2Lowfit->GetParameter(1), M2Lowfit->GetParError(1)), "l");
+			legW2[kk].SetBorderSize(0);
+			legW2[kk].SetTextSize(0.03);
+			legW2[kk].Draw();
+		}
+
+		ccx->SaveAs(Form("./figures_xsec/%d/Acceptance/SDLowM_%s.pdf", fRunNumber_, fMCName_.Data()) );
+		delete ccx;
+
+
+		TCanvas* ccx2 = new TCanvas(Form("ccx2_%s",fMCName_.Data()), "SDMass", 500, 280);
+		ccx2->Divide(2,1);
+		TLegend legW22[2] = {TLegend(0.45,0.73, 0.82,0.87), TLegend(0.45,0.73, 0.82,0.87)};
+		
+		for (UInt_t kk = 0; kk < 2; ++kk) {
+			ccx2->cd(kk+1);
+			ccx2->cd(kk+1)->SetLogy();
+			ccx2->cd(kk+1)->SetLogx();
+
+			hDiffMassSD_gene[kk]->Fit("M2fit","ER"); // "E" minos errors, R" restricts the fit
+			hDiffMassSD_gene[kk]->Draw();
+
+			// legend (x1,y1, x2, y2) with FIT values
+			legW22[kk].AddEntry(M2fit, Form("C x 1/(M^{2})^{1+#Delta}, #Delta = %0.2f #pm %0.2f",
 				M2fit->GetParameter(1), M2fit->GetParError(1)), "l");
-			legW.SetBorderSize(0);
-			legW.SetTextSize(0.03);
-			legW.Draw();
-			*/
+			legW22[kk].SetBorderSize(0);
+			legW22[kk].SetTextSize(0.03);
+			legW22[kk].Draw();
+		}
 
-			// Calculate the efficiency by dividing with the generated
-			/*
-			h2DiffMassDD_seen_GEN[i]->Divide(h2DiffMassDD_gene);
-			h2DiffMassDD_seen_DET[i]->Divide(h2DiffMassDD_gene);
+		ccx2->SaveAs(Form("./figures_xsec/%d/Acceptance/SDHighM_%s.pdf", fRunNumber_, fMCName_.Data()) );
+		delete ccx2;
 
-			for (Int_t side = 0; side < 2; ++side) {
-				c5->cd(1)->SetLogy();
-				c5->cd(1)->SetLogx();
-				h2DiffMassDD_seen_GEN[i]->Draw("COLZ");
-			}
-			
-			c5->cd(2)->SetLogy(); c5->cd(2)->SetLogx();
-			h2DiffMassDD_gene->Draw("COLZ");
 
-			c5->SaveAs(Form("./figures_xsec/%d/Acceptance/DD_%s_%s_Acc_Mass.pdf", fRunNumber_, fMCName_.Data(), det_labels_[i].Data() ));
-			*/
+		// ----------------------------------------------------------	
+		// Efficiency simulations >>
 
-			// ***********************************************************
-
-			// Loop over detectors >>
-			TCanvas* c6 = new TCanvas(Form("c6_%s",fMCName_.Data()), "DiffDeltaYSD", 300, 800);
-			c6->Divide(2,d_);
-			kk = 1;
-			for (Int_t i = 0; i < d_; ++i) {
-
-				// Loop over SDL and SDR
-				for (Int_t side = 0; side < 2; ++side) {
-
-					c6->cd(kk);
-					hDiffDeltaYSD_seen_GEN[i][side]->Draw("SAME");
-					hDiffDeltaYSD_seen_DET[i][side]->Draw("SAME");
-					++kk;
-				}
-			}
-			c6->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_DeltaY_Vertical.pdf", fRunNumber_, fMCName_.Data()) );
-			delete c6;
-
-			// Loop over SDL and SDR
-			TCanvas* c66 = new TCanvas(Form("c66_%s",fMCName_.Data()), "DiffDeltaYSD", 1000, 300);
-			c66->Divide(d_,2);
-			kk = 1;
-			for (Int_t side = 0; side < 2; ++side) {
-
-				// Loop over detectors
-				for (Int_t i = 0; i < d_; ++i) {
-
-					c66->cd(kk);
-					hDiffDeltaYSD_seen_GEN[i][side]->Draw("SAME");
-					hDiffDeltaYSD_seen_DET[i][side]->Draw("SAME");
-					++kk;
-				}
-			}
-			c66->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_DeltaY_Horizontal.pdf", fRunNumber_, fMCName_.Data()) );
-			delete c66;
-
-			/*
-			// Generated
-			c6->cd(side+3);
-			hDiffDeltaYSD_gene[side]->Draw();
-			*/
-
-			/*
-			h1DiffDeltaYDD_seen_GEN[i]->Divide(h1DiffDeltaYDD_gene);
-
-			c7->cd(1);
-			h1DiffDeltaYDD_seen_GEN[i]->Draw();
-
-			c7->cd(2);
-			h1DiffDeltaYDD_gene->Draw();
-
-			c7->SaveAs(Form("./figures_xsec/%d/Acceptance/DD_%s_%s_Acc_DeltaY.pdf", fRunNumber_, fMCName_.Data(), det_labels_[i].Data() ));
-			*/
+		for (Int_t side = 0; side < 2; ++side) {
+			// Fit
+				hDiffMassSD_gene[side]->Fit("M2fit","ER"); // "E" minos errors, R" restricts the fit
 		}
 
 
-		// Delete fit object
-		delete M2fit;
-		delete M2Lowfit;
+		// Loop over detectors >>
 
-		// Delete canvases
-	   	for (UInt_t c = 0; c < ncomb; ++c) {
-	   		delete c2DXC[c];
-	   		delete c2D[c];
-	   	}
-	   	delete c5;
-	   	delete c7;
+		// Calculate efficiencies
+		for (Int_t i = 0; i < d_; ++i) {
+
+			// Loop over C and A sides
+			for (Int_t side = 0; side < 2; ++side) {
+
+				// Calculate the efficiency by dividing with generated
+				hDiffMassSD_seen_GEN[i][side]->Divide(hDiffMassSD_gene[side]);
+				hDiffMassSD_seen_DET[i][side]->Divide(hDiffMassSD_gene[side]);
+
+				hDiffMassSD_seen_GEN[i][side]->SetMaximum(1.0);
+				hDiffMassSD_seen_DET[i][side]->SetMaximum(1.0);
+				hDiffMassSD_seen_GEN[i][side]->SetMinimum(0.0);
+				hDiffMassSD_seen_DET[i][side]->SetMinimum(0.0);
+
+				// Calculate the efficiency by dividing with generated
+				hDiffDeltaYSD_seen_GEN[i][side]->Divide(hDiffDeltaYSD_gene[side]);
+				hDiffDeltaYSD_seen_DET[i][side]->Divide(hDiffDeltaYSD_gene[side]);
+
+				hDiffDeltaYSD_seen_GEN[i][side]->SetMaximum(1.0);
+				hDiffDeltaYSD_seen_DET[i][side]->SetMaximum(1.0);
+				hDiffDeltaYSD_seen_GEN[i][side]->SetMinimum(0.0);
+				hDiffDeltaYSD_seen_DET[i][side]->SetMinimum(0.0);
+			}
+		}
+
+
+		// Loop over detectors
+		TCanvas* c4 = new TCanvas(Form("c4_%s",fMCName_.Data()), "DiffMassSD", 300, 800);
+		c4->Divide(2,d_);
+		Int_t kk = 1;
+		for (Int_t i = 0; i < d_; ++i) {
+
+			// Loop over SDL and SDR
+			for (Int_t side = 0; side < 2; ++side) {
+
+				c4->cd(kk)->SetLogx(); 
+				hDiffMassSD_seen_GEN[i][side]->Draw("SAME");
+				hDiffMassSD_seen_DET[i][side]->Draw("SAME");
+				++kk;
+			}
+		}
+		c4->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_Mass_Vertical.pdf", fRunNumber_, fMCName_.Data() ));
+		delete c4;
+
+		// Loop over SDL and SDR
+		TCanvas* c44 = new TCanvas(Form("c44_%s",fMCName_.Data()), "DiffMassSD", 1000, 300);
+		c44->Divide(d_,2);
+		kk = 1;
+		for (Int_t side = 0; side < 2; ++side) {
+
+			// Loop over detectors
+			for (Int_t i = 0; i < d_; ++i) {
+
+				c44->cd(kk)->SetLogx(); 
+				hDiffMassSD_seen_GEN[i][side]->Draw("SAME");
+				hDiffMassSD_seen_DET[i][side]->Draw("SAME");
+				++kk;
+			}
+		}
+		c44->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_Mass_Horizontal.pdf", fRunNumber_, fMCName_.Data() ));
+		delete c44;
+
+		/*
+		// Regge-Mass distributions
+		c4->cd(side+3)->SetLogy();
+		c4->cd(side+3)->SetLogx();
+		hDiffMassSD_gene[side]->Draw();	
+
+		// legend (x1,y1, x2, y2) with FIT values
+		TLegend legW = TLegend(0.5,0.73, 0.82,0.87);
+		legW.AddEntry(M2fit, Form("C x 1/(M^{2})^{1+#epsilon}, #epsilon = %0.2f #pm %0.2f",
+			M2fit->GetParameter(1), M2fit->GetParError(1)), "l");
+		legW.SetBorderSize(0);
+		legW.SetTextSize(0.03);
+		legW.Draw();
+		*/
+
+		// Calculate the efficiency by dividing with the generated
+		/*
+		h2DiffMassDD_seen_GEN[i]->Divide(h2DiffMassDD_gene);
+		h2DiffMassDD_seen_DET[i]->Divide(h2DiffMassDD_gene);
+
+		for (Int_t side = 0; side < 2; ++side) {
+			c5->cd(1)->SetLogy();
+			c5->cd(1)->SetLogx();
+			h2DiffMassDD_seen_GEN[i]->Draw("COLZ");
+		}
+		
+		c5->cd(2)->SetLogy(); c5->cd(2)->SetLogx();
+		h2DiffMassDD_gene->Draw("COLZ");
+
+		c5->SaveAs(Form("./figures_xsec/%d/Acceptance/DD_%s_%s_Acc_Mass.pdf", fRunNumber_, fMCName_.Data(), det_labels_[i].Data() ));
+		*/
+
+		// ***********************************************************
+
+		// Loop over detectors >>
+		TCanvas* c6 = new TCanvas(Form("c6_%s",fMCName_.Data()), "DiffDeltaYSD", 300, 800);
+		c6->Divide(2,d_);
+		kk = 1;
+		for (Int_t i = 0; i < d_; ++i) {
+
+			// Loop over SDL and SDR
+			for (Int_t side = 0; side < 2; ++side) {
+
+				c6->cd(kk);
+				hDiffDeltaYSD_seen_GEN[i][side]->Draw("SAME");
+				hDiffDeltaYSD_seen_DET[i][side]->Draw("SAME");
+				++kk;
+			}
+		}
+		c6->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_DeltaY_Vertical.pdf", fRunNumber_, fMCName_.Data()) );
+		delete c6;
+
+		// Loop over SDL and SDR
+		TCanvas* c66 = new TCanvas(Form("c66_%s",fMCName_.Data()), "DiffDeltaYSD", 1000, 300);
+		c66->Divide(d_,2);
+		kk = 1;
+		for (Int_t side = 0; side < 2; ++side) {
+
+			// Loop over detectors
+			for (Int_t i = 0; i < d_; ++i) {
+
+				c66->cd(kk);
+				hDiffDeltaYSD_seen_GEN[i][side]->Draw("SAME");
+				hDiffDeltaYSD_seen_DET[i][side]->Draw("SAME");
+				++kk;
+			}
+		}
+		c66->SaveAs(Form("./figures_xsec/%d/Acceptance/SD_%s_Acc_DeltaY_Horizontal.pdf", fRunNumber_, fMCName_.Data()) );
+		delete c66;
+
+		/*
+		// Generated
+		c6->cd(side+3);
+		hDiffDeltaYSD_gene[side]->Draw();
+		*/
+
+		/*
+		h1DiffDeltaYDD_seen_GEN[i]->Divide(h1DiffDeltaYDD_gene);
+
+		c7->cd(1);
+		h1DiffDeltaYDD_seen_GEN[i]->Draw();
+
+		c7->cd(2);
+		h1DiffDeltaYDD_gene->Draw();
+
+		c7->SaveAs(Form("./figures_xsec/%d/Acceptance/DD_%s_%s_Acc_DeltaY.pdf", fRunNumber_, fMCName_.Data(), det_labels_[i].Data() ));
+		*/
 	}
+
+
+	// Delete fit object
+	delete M2fit;
+	delete M2Lowfit;
+
+	// Delete canvases
+   	for (UInt_t c = 0; c < ncomb; ++c) {
+   		delete c2DXC[c];
+   		delete c2D[c];
+   	}
+   	delete c5;
+   	delete c7;
+
 
 }
 
@@ -2358,10 +2380,10 @@ void Combinatorics::ReadTree() {
 	// MAXIMUM NUMBER OF EVENTS (FOR SPEED/DEBUG)
 	if (!fIsMC_) {
 		nentries = std::round(nentries * MAXEVENTS_DATA) <= nentries ? std::round(nentries * MAXEVENTS_DATA) : nentries;
-		printf("Maximum number of events limit set (%0.2f): %llu \n\n", MAXEVENTS_DATA, nentries);
+		printf("Maximum number of events limit set (%0.5f): %llu \n\n", MAXEVENTS_DATA, nentries);
 	}  else {
 		nentries = std::round(nentries * MAXEVENTS_MC) <= nentries ? std::round(nentries * MAXEVENTS_MC) : nentries;
-		printf("Maximum number of events limit set (%0.2f): %llu \n\n", MAXEVENTS_MC, nentries);
+		printf("Maximum number of events limit set (%0.5f): %llu \n\n", MAXEVENTS_MC, nentries);
 	}
 	// Create TTree code
 	//fTE->MakeCode("fastCode.cxx");
@@ -2540,8 +2562,6 @@ void Combinatorics::ReadTree() {
 	delete fFastOrMap;
 	delete fFiredChipMap;
 	delete fMCInfo;
-
-
 }
 
 
@@ -2558,8 +2578,7 @@ void Combinatorics::GenerateModel(Double_t POMERON_DELTA, Double_t XI_MAX) {
 		printf(" + Maximum XI = %0.3E (Minimum <DeltaY> = %0.1f) \n", XI_MAX, VecOper::xi2deltaY(XI_MAX) );
 		printf(" + Double Diffraction Cutoff Mode = %d (0 = product kinematics, 1 = separate kinematics)\n\n", DD_XIMAX_MODE);
 	}
-
-
+	
 	// Loop over events
 	for (UInt_t i = 0; i < events.size(); ++i) {
 
@@ -2722,7 +2741,6 @@ Double_t Combinatorics::CalculateMCReWeight(const evec& ev, Double_t POMERON_DEL
 }
 
 
-
 void Combinatorics::FillSPDAscii(const CombEvent* event, Int_t eventnr, FILE* fp) {
 	
 	// Save SPD information to outputfile
@@ -2737,7 +2755,6 @@ void Combinatorics::FillSPDAscii(const CombEvent* event, Int_t eventnr, FILE* fp
 		}
 		fprintf(fp, "\n");
 	}
-	
 }
 
 
@@ -2871,228 +2888,228 @@ void Combinatorics::FillGapFlow(const CombEvent* event, const evec& ev) {
 // Basic histogram output
 void Combinatorics::FillHistograms(const CombEvent* event, const evec& ev) {
 
-
 	// Detector level Boolean vector
 	std::vector<Bool_t> s = VecOper::Ind2Vec(ev.c, d_);
 
-	if (HISTOGRAMS_ON) {
+	// Generator level Boolean vector
+	std::vector<Bool_t> s_gen;
+	if (fIsMC_) { 
+		s_gen = VecOper::Ind2Vec(ev.c_gen, d_);
 
-		if (fIsMC_) {
+		// For Folding Matrix Visualization
 
-			// Generator level Boolean vector
-			std::vector<Bool_t> s_gen = VecOper::Ind2Vec(ev.c_gen, d_);
+		// Gray code ordering test
+		/*
+		UInt_t GC_c     = Binary2Gray(c);
+		UInt_t GC_c_gen = Binary2Gray(c_gen);
+		*/
+
+		// Folding Matrix Visualizaiton
+		M->Fill(ev.c, ev.c_gen);
+	}
+
+	// ------------------------------------------------------------------
+
+	if (!HISTOGRAMS_ON) { return; }
+
+	if (fIsMC_) {
+
+		// Variables to do the shifting and flip in the rapidity edge space
+		const Double_t Ddiff = (ev.proc == 0) ? std::log(SQRTS/MP) : -std::log(SQRTS/MP);
+		const Double_t Dsign = (ev.proc == 0) ? 1.0 : -1.0;
+
+		// Fill diffractive masses
+		if (ev.proc == 0 || ev.proc == 1) { // SDL or SDR
+
+			const Double_t mass   = event->fMCInfo()->fDiffSys.Mass[ev.proc] + EPS;
+			const Double_t mass2  = pow2(mass);
+
+			hDiffMassSDLowM_gene[ev.proc]->Fill(mass2, ev.weight);
+			hDiffMassSD_gene[ev.proc]->Fill(mass2, ev.weight);
+			hDiffDeltaYSD_gene[ev.proc]->Fill(Dsign*TMath::Log( mass2 / std::pow(SQRTS,2) + EPS ) + Ddiff, ev.weight);
+
+			// Loop over C and A sides
+			for (Int_t k = 0; k < 2; ++k) {
+
+				// 1D
+				UInt_t SPDbits = (k == 0) ? nbits_inner_[C] + nbits_outer_[C] : nbits_inner_[A]  + nbits_outer_[A];
+
+				// Mass
+				hAD_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fADInfo.fCharge[k]);
+				hV0_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fV0Info.fCharge[k]);
+				hSPD_M_avgFO[ev.proc][k]->Fill(std::log10(mass + 1e-5), SPDbits);
+				hZDN_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fZDCInfo.fZNEnergy[k]);
+				hZDP_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fZDCInfo.fZPEnergy[k]);
+
+				h2AD_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fADInfo.fCharge[k]);
+				h2V0_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fV0Info.fCharge[k]);
+				h2SPD_M_FO[ev.proc][k]->Fill(mass, SPDbits);
+				h2ZDN_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fZDCInfo.fZNEnergy[k]);
+				h2ZDP_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fZDCInfo.fZPEnergy[k]);
+			}
 
 
-			// For Folding Matrix Visualization
-
-			// Gray code ordering
-			/*
-			UInt_t GC_c     = Binary2Gray(c);
-			UInt_t GC_c_gen = Binary2Gray(c_gen);
-			*/
-
-			// Folding Matrix Visualizaiton
-			M->Fill(ev.c, ev.c_gen);
+			// Particles within fiducial domain
+			// C-side
+			hAD_N_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ADC.NCharged + event->fMCInfo()->ADC.NNeutral, event->fTreeData()->fADInfo.fCharge[C]);
 			
-			// Variables to do the shifting and flip in the rapidity edge space
-			const Double_t Ddiff = (ev.proc == 0) ? std::log(SQRTS/MP) : -std::log(SQRTS/MP);
-			const Double_t Dsign = (ev.proc == 0) ? 1.0 : -1.0;
+			// Charged only events
+			if (event->fMCInfo()->ADC.NNeutral == 0 && event->fMCInfo()->ADC.NCharged > 0) {
+				hAD_Nch_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ADC.NCharged, event->fTreeData()->fADInfo.fCharge[C]);
+			}
+			// Neutral only events
+			if (event->fMCInfo()->ADC.NNeutral > 0 && event->fMCInfo()->ADC.NCharged == 0) {
+				hAD_Nn_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ADC.NNeutral, event->fTreeData()->fADInfo.fCharge[C]);
+			}
+			
+			hV0_N_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->V0C.NCharged + event->fMCInfo()->V0C.NNeutral, event->fTreeData()->fV0Info.fCharge[C]);
 
-			// Fill diffractive masses
-			if (ev.proc == 0 || ev.proc == 1) { // SDL or SDR
-
-				const Double_t mass   = event->fMCInfo()->fDiffSys.Mass[ev.proc] + EPS;
-				const Double_t mass2  = pow2(mass);
-
-				hDiffMassSDLowM_gene[ev.proc]->Fill(mass2, ev.weight);
-				hDiffMassSD_gene[ev.proc]->Fill(mass2, ev.weight);
-				hDiffDeltaYSD_gene[ev.proc]->Fill(Dsign*TMath::Log( mass2 / std::pow(SQRTS,2) + EPS ) + Ddiff, ev.weight);
-
-				// Loop over C and A sides
-				for (Int_t k = 0; k < 2; ++k) {
-
-					// 1D
-					UInt_t SPDbits = (k == 0) ? nbits_inner_[C] + nbits_outer_[C] : nbits_inner_[A]  + nbits_outer_[A];
-
-					// Mass
-					hAD_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fADInfo.fCharge[k]);
-					hV0_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fV0Info.fCharge[k]);
-					hSPD_M_avgFO[ev.proc][k]->Fill(std::log10(mass + 1e-5), SPDbits);
-					hZDN_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fZDCInfo.fZNEnergy[k]);
-					hZDP_M_avgCharge[ev.proc][k]->Fill(std::log10(mass + 1e-5), event->fTreeData()->fZDCInfo.fZPEnergy[k]);
-
-					h2AD_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fADInfo.fCharge[k]);
-					h2V0_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fV0Info.fCharge[k]);
-					h2SPD_M_FO[ev.proc][k]->Fill(mass, SPDbits);
-					h2ZDN_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fZDCInfo.fZNEnergy[k]);
-					h2ZDP_M_Charge[ev.proc][k]->Fill(mass, event->fTreeData()->fZDCInfo.fZPEnergy[k]);
-				}
-
-
-				// Particles within fiducial domain
-				// C-side
-				hAD_N_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ADC.NCharged + event->fMCInfo()->ADC.NNeutral, event->fTreeData()->fADInfo.fCharge[C]);
-				
-				// Charged only events
-				if (event->fMCInfo()->ADC.NNeutral == 0 && event->fMCInfo()->ADC.NCharged > 0) {
-					hAD_Nch_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ADC.NCharged, event->fTreeData()->fADInfo.fCharge[C]);
-				}
-				// Neutral only events
-				if (event->fMCInfo()->ADC.NNeutral > 0 && event->fMCInfo()->ADC.NCharged == 0) {
-					hAD_Nn_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ADC.NNeutral, event->fTreeData()->fADInfo.fCharge[C]);
-				}
-				
-				hV0_N_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->V0C.NCharged + event->fMCInfo()->V0C.NNeutral, event->fTreeData()->fV0Info.fCharge[C]);
-
-				if (event->fMCInfo()->V0C.NNeutral == 0 && event->fMCInfo()->V0C.NCharged > 0) {
-					hV0_Nch_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->V0C.NCharged, event->fTreeData()->fV0Info.fCharge[C]);
-				}
-
-				if (event->fMCInfo()->V0C.NNeutral > 0 && event->fMCInfo()->V0C.NCharged == 0) {
-					hV0_Nn_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->V0C.NNeutral, event->fTreeData()->fV0Info.fCharge[C]);
-				}
-
-				hSPD_N_avgFO[ev.proc][C]->Fill(event->fMCInfo()->SPDC.NCharged + event->fMCInfo()->SPDC.NNeutral, nbits_inner_[C] + nbits_outer_[C]);
-				
-				if (event->fMCInfo()->SPDC.NNeutral == 0 && event->fMCInfo()->SPDC.NCharged > 0) {
-					hSPD_Nch_avgFO[ev.proc][C]->Fill(event->fMCInfo()->SPDC.NCharged, nbits_inner_[C] + nbits_outer_[C]);
-				}
-				if (event->fMCInfo()->SPDC.NNeutral > 0 && event->fMCInfo()->SPDC.NCharged == 0) {
-					hSPD_Nn_avgFO[ev.proc][C]->Fill(event->fMCInfo()->SPDC.NNeutral, nbits_inner_[C] + nbits_outer_[C]);
-				}
-
-				hZDN_Nn_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ZDNC.NNeutral, event->fTreeData()->fZDCInfo.fZNEnergy[C]);
-				
-				// A-side
-				hAD_N_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ADA.NCharged + event->fMCInfo()->ADA.NNeutral, event->fTreeData()->fADInfo.fCharge[A]);
-				
-				if (event->fMCInfo()->ADA.NNeutral == 0 && event->fMCInfo()->ADA.NCharged > 0) {
-					hAD_Nch_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ADA.NCharged, event->fTreeData()->fADInfo.fCharge[A]);
-				}
-				if (event->fMCInfo()->ADA.NNeutral > 0 && event->fMCInfo()->ADA.NCharged == 0) {
-					hAD_Nn_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ADA.NNeutral, event->fTreeData()->fADInfo.fCharge[A]);
-				}
-
-				hV0_N_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->V0A.NCharged + event->fMCInfo()->V0A.NNeutral, event->fTreeData()->fV0Info.fCharge[A]);
-				
-				if (event->fMCInfo()->V0A.NNeutral == 0 && event->fMCInfo()->V0A.NCharged > 0) {
-					hV0_Nch_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->V0A.NCharged, event->fTreeData()->fV0Info.fCharge[A]);
-				}						
-				if (event->fMCInfo()->V0A.NNeutral > 0 && event->fMCInfo()->V0A.NCharged == 0) {
-					hV0_Nn_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->V0A.NNeutral, event->fTreeData()->fV0Info.fCharge[A]);
-				}
-
-				hSPD_N_avgFO[ev.proc][A]->Fill(event->fMCInfo()->SPDA.NCharged + event->fMCInfo()->SPDA.NNeutral, nbits_inner_[A] + nbits_outer_[A]);
-				
-				if (event->fMCInfo()->SPDA.NNeutral == 0 && event->fMCInfo()->SPDA.NCharged > 0) {
-					hSPD_Nch_avgFO[ev.proc][A]->Fill(event->fMCInfo()->SPDA.NCharged, nbits_inner_[A] + nbits_outer_[A]);
-				}
-				if (event->fMCInfo()->SPDA.NNeutral > 0 && event->fMCInfo()->SPDA.NCharged == 0) {
-					hSPD_Nn_avgFO[ev.proc][A]->Fill(event->fMCInfo()->SPDA.NNeutral, nbits_inner_[A] + nbits_outer_[A]);
-				}
-
-				hZDN_Nn_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ZDNA.NNeutral, event->fTreeData()->fZDCInfo.fZNEnergy[A]);
+			if (event->fMCInfo()->V0C.NNeutral == 0 && event->fMCInfo()->V0C.NCharged > 0) {
+				hV0_Nch_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->V0C.NCharged, event->fTreeData()->fV0Info.fCharge[C]);
 			}
 
-			if (ev.proc  == 2) { // DD
-				h2DiffMassDD_gene->Fill(pow(event->fMCInfo()->fDiffSys.Mass[0],2), pow(event->fMCInfo()->fDiffSys.Mass[1],2), ev.weight);
-				h1DiffDeltaYDD_gene->Fill(-TMath::Log( (ev.M2_L*ev.M2_R)/(pow2(MP)*pow2(SQRTS)) + EPS ), ev.weight);
+			if (event->fMCInfo()->V0C.NNeutral > 0 && event->fMCInfo()->V0C.NCharged == 0) {
+				hV0_Nn_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->V0C.NNeutral, event->fTreeData()->fV0Info.fCharge[C]);
 			}
 
-			if (ev.proc == 0 || ev.proc == 1) { // SDL or SDR
-				// Loop over detectors
-				for (Int_t k = 0; k < d_; ++k) {
+			hSPD_N_avgFO[ev.proc][C]->Fill(event->fMCInfo()->SPDC.NCharged + event->fMCInfo()->SPDC.NNeutral, nbits_inner_[C] + nbits_outer_[C]);
+			
+			if (event->fMCInfo()->SPDC.NNeutral == 0 && event->fMCInfo()->SPDC.NCharged > 0) {
+				hSPD_Nch_avgFO[ev.proc][C]->Fill(event->fMCInfo()->SPDC.NCharged, nbits_inner_[C] + nbits_outer_[C]);
+			}
+			if (event->fMCInfo()->SPDC.NNeutral > 0 && event->fMCInfo()->SPDC.NCharged == 0) {
+				hSPD_Nn_avgFO[ev.proc][C]->Fill(event->fMCInfo()->SPDC.NNeutral, nbits_inner_[C] + nbits_outer_[C]);
+			}
 
-					if (s_gen.at(k)) { // Generator level seen
-						hDiffMassSD_seen_GEN[k][ev.proc]->Fill(pow(event->fMCInfo()->fDiffSys.Mass[ev.proc],2), ev.weight);
-						hDiffDeltaYSD_seen_GEN[k][ev.proc]->Fill(Dsign*TMath::Log( std::pow(event->fMCInfo()->fDiffSys.Mass[ev.proc], 2) / pow2(SQRTS) + EPS ) + Ddiff, ev.weight);
-					
-					}
-					if (s.at(k)) { 	   // Detector level seen
-						hDiffMassSD_seen_DET[k][ev.proc]->Fill(pow(event->fMCInfo()->fDiffSys.Mass[ev.proc],2), ev.weight);
-						hDiffDeltaYSD_seen_DET[k][ev.proc]->Fill(Dsign*TMath::Log( std::pow(event->fMCInfo()->fDiffSys.Mass[ev.proc], 2) / pow2(SQRTS) + EPS ) + Ddiff, ev.weight);
-					
-					}
+			hZDN_Nn_avgCharge[ev.proc][C]->Fill(event->fMCInfo()->ZDNC.NNeutral, event->fTreeData()->fZDCInfo.fZNEnergy[C]);
+			
+			// A-side
+			hAD_N_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ADA.NCharged + event->fMCInfo()->ADA.NNeutral, event->fTreeData()->fADInfo.fCharge[A]);
+			
+			if (event->fMCInfo()->ADA.NNeutral == 0 && event->fMCInfo()->ADA.NCharged > 0) {
+				hAD_Nch_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ADA.NCharged, event->fTreeData()->fADInfo.fCharge[A]);
+			}
+			if (event->fMCInfo()->ADA.NNeutral > 0 && event->fMCInfo()->ADA.NCharged == 0) {
+				hAD_Nn_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ADA.NNeutral, event->fTreeData()->fADInfo.fCharge[A]);
+			}
+
+			hV0_N_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->V0A.NCharged + event->fMCInfo()->V0A.NNeutral, event->fTreeData()->fV0Info.fCharge[A]);
+			
+			if (event->fMCInfo()->V0A.NNeutral == 0 && event->fMCInfo()->V0A.NCharged > 0) {
+				hV0_Nch_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->V0A.NCharged, event->fTreeData()->fV0Info.fCharge[A]);
+			}						
+			if (event->fMCInfo()->V0A.NNeutral > 0 && event->fMCInfo()->V0A.NCharged == 0) {
+				hV0_Nn_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->V0A.NNeutral, event->fTreeData()->fV0Info.fCharge[A]);
+			}
+
+			hSPD_N_avgFO[ev.proc][A]->Fill(event->fMCInfo()->SPDA.NCharged + event->fMCInfo()->SPDA.NNeutral, nbits_inner_[A] + nbits_outer_[A]);
+			
+			if (event->fMCInfo()->SPDA.NNeutral == 0 && event->fMCInfo()->SPDA.NCharged > 0) {
+				hSPD_Nch_avgFO[ev.proc][A]->Fill(event->fMCInfo()->SPDA.NCharged, nbits_inner_[A] + nbits_outer_[A]);
+			}
+			if (event->fMCInfo()->SPDA.NNeutral > 0 && event->fMCInfo()->SPDA.NCharged == 0) {
+				hSPD_Nn_avgFO[ev.proc][A]->Fill(event->fMCInfo()->SPDA.NNeutral, nbits_inner_[A] + nbits_outer_[A]);
+			}
+
+			hZDN_Nn_avgCharge[ev.proc][A]->Fill(event->fMCInfo()->ZDNA.NNeutral, event->fTreeData()->fZDCInfo.fZNEnergy[A]);
+		}
+
+		if (ev.proc  == 2) { // DD
+			h2DiffMassDD_gene->Fill(pow(event->fMCInfo()->fDiffSys.Mass[0],2), pow(event->fMCInfo()->fDiffSys.Mass[1],2), ev.weight);
+			h1DiffDeltaYDD_gene->Fill(-TMath::Log( (ev.M2_L*ev.M2_R)/(pow2(MP)*pow2(SQRTS)) + EPS ), ev.weight);
+		}
+
+		if (ev.proc == 0 || ev.proc == 1) { // SDL or SDR
+			// Loop over detectors
+			for (Int_t k = 0; k < d_; ++k) {
+
+				if (s_gen.at(k)) { // Generator level seen
+					hDiffMassSD_seen_GEN[k][ev.proc]->Fill(pow(event->fMCInfo()->fDiffSys.Mass[ev.proc],2), ev.weight);
+					hDiffDeltaYSD_seen_GEN[k][ev.proc]->Fill(Dsign*TMath::Log( std::pow(event->fMCInfo()->fDiffSys.Mass[ev.proc], 2) / pow2(SQRTS) + EPS ) + Ddiff, ev.weight);
+				
 				}
-			}
-
-			if (ev.proc  == 2) { // DD
-				// Loop over detectors
-				for (Int_t k = 0; k < d_; ++k) {
-					if (s_gen.at(k)) { 	// Generator level seen
-						h2DiffMassDD_seen_GEN[k]->Fill(pow2(event->fMCInfo()->fDiffSys.Mass[0]), pow2(event->fMCInfo()->fDiffSys.Mass[1]), ev.weight);
-						h1DiffDeltaYDD_seen_GEN[k]->Fill(-TMath::Log( (ev.M2_L*ev.M2_R)/(pow2(MP)*pow2(SQRTS)) + EPS), ev.weight);	
-					}
-					if (s.at(k)) { 	    // Detector level seen
-						h2DiffMassDD_seen_DET[k]->Fill(pow2(event->fMCInfo()->fDiffSys.Mass[0]), pow2(event->fMCInfo()->fDiffSys.Mass[1]), ev.weight);
-						h1DiffDeltaYDD_seen_DET[k]->Fill(-TMath::Log( (ev.M2_L*ev.M2_R)/(pow2(MP)*pow2(SQRTS)) + EPS), ev.weight);
-					}
+				if (s.at(k)) { 	   // Detector level seen
+					hDiffMassSD_seen_DET[k][ev.proc]->Fill(pow(event->fMCInfo()->fDiffSys.Mass[ev.proc],2), ev.weight);
+					hDiffDeltaYSD_seen_DET[k][ev.proc]->Fill(Dsign*TMath::Log( std::pow(event->fMCInfo()->fDiffSys.Mass[ev.proc], 2) / pow2(SQRTS) + EPS ) + Ddiff, ev.weight);
+				
 				}
 			}
 		}
 
-		// Loop over the SPD chips
-		Double_t num_fired = 0;
-		for (UInt_t b = 0; b < 1200; ++b) {
-
-			if ( event->fFiredChipMap()->TestBitNumber(b) == kTRUE ) {
-				 hSPDbit[ev.c]->Fill(b); // Fill if true
-			 	 //h2->Fill(i, b);
-			 	 ++num_fired;
+		if (ev.proc  == 2) { // DD
+			// Loop over detectors
+			for (Int_t k = 0; k < d_; ++k) {
+				if (s_gen.at(k)) { 	// Generator level seen
+					h2DiffMassDD_seen_GEN[k]->Fill(pow2(event->fMCInfo()->fDiffSys.Mass[0]), pow2(event->fMCInfo()->fDiffSys.Mass[1]), ev.weight);
+					h1DiffDeltaYDD_seen_GEN[k]->Fill(-TMath::Log( (ev.M2_L*ev.M2_R)/(pow2(MP)*pow2(SQRTS)) + EPS), ev.weight);	
+				}
+				if (s.at(k)) { 	    // Detector level seen
+					h2DiffMassDD_seen_DET[k]->Fill(pow2(event->fMCInfo()->fDiffSys.Mass[0]), pow2(event->fMCInfo()->fDiffSys.Mass[1]), ev.weight);
+					h1DiffDeltaYDD_seen_DET[k]->Fill(-TMath::Log( (ev.M2_L*ev.M2_R)/(pow2(MP)*pow2(SQRTS)) + EPS), ev.weight);
+				}
 			}
 		}
+	}
 
-		// Tracklets
-		hSPDTR[ev.c]->Fill(event->fTreeData()->fEventInfo.fnTrklet);
+	// Loop over the SPD chips
+	Double_t num_fired = 0;
+	for (UInt_t b = 0; b < 1200; ++b) {
 
-		// ZDC, AD, V0 charge and time 1D histograms & 2D histograms
-		for (UInt_t k = 0; k < 2; ++k) {
+		if ( event->fFiredChipMap()->TestBitNumber(b) == kTRUE ) {
+			 hSPDbit[ev.c]->Fill(b); // Fill if true
+		 	 //h2->Fill(i, b);
+		 	 ++num_fired;
+		}
+	}
 
-			if (k == 0) { // C-side
-				hSPDFO[ev.c][k]->Fill(nbits_inner_[C] + nbits_outer_[C]);
-				h2SPDFOTR[ev.c][k]->Fill(event->fTreeData()->fEventInfo.fnTrklet, nbits_inner_[C] + nbits_outer_[C]);
-			} else {      // A-side
-				hSPDFO[ev.c][k]->Fill(nbits_inner_[A] + nbits_outer_[A]);
-				h2SPDFOTR[ev.c][k]->Fill(event->fTreeData()->fEventInfo.fnTrklet, nbits_inner_[A] + nbits_outer_[A]);		
-			}
+	// Tracklets
+	hSPDTR[ev.c]->Fill(event->fTreeData()->fEventInfo.fnTrklet);
 
-			// ZDN
-			hZDN[ev.c][k]->Fill(event->fTreeData()->fZDCInfo.fZNEnergy[k]);
-			hZDP[ev.c][k]->Fill(event->fTreeData()->fZDCInfo.fZPEnergy[k]);
+	// ZDC, AD, V0 charge and time 1D histograms & 2D histograms
+	for (UInt_t k = 0; k < 2; ++k) {
 
-			// AD
-			hADCharge[ev.c][k]->Fill(event->fTreeData()->fADInfo.fCharge[k]);
-			hADTime[ev.c][k]->Fill(event->fTreeData()->fADInfo.fTime[k]);
-
-			// V0
-			hV0Charge[ev.c][k]->Fill(event->fTreeData()->fV0Info.fCharge[k]);
-			hV0Time[ev.c][k]->Fill(event->fTreeData()->fV0Info.fTime[k]);
-
-
-			// 2D
-			h2ADCT[ev.c][k]->Fill(event->fTreeData()->fADInfo.fTime[k], event->fTreeData()->fADInfo.fCharge[k]);
-			h2V0CT[ev.c][k]->Fill(event->fTreeData()->fV0Info.fTime[k], event->fTreeData()->fV0Info.fCharge[k]);
+		if (k == 0) { // C-side
+			hSPDFO[ev.c][k]->Fill(nbits_inner_[C] + nbits_outer_[C]);
+			h2SPDFOTR[ev.c][k]->Fill(event->fTreeData()->fEventInfo.fnTrklet, nbits_inner_[C] + nbits_outer_[C]);
+		} else {      // A-side
+			hSPDFO[ev.c][k]->Fill(nbits_inner_[A] + nbits_outer_[A]);
+			h2SPDFOTR[ev.c][k]->Fill(event->fTreeData()->fEventInfo.fnTrklet, nbits_inner_[A] + nbits_outer_[A]);		
 		}
 
+		// ZDN
+		hZDN[ev.c][k]->Fill(event->fTreeData()->fZDCInfo.fZNEnergy[k]);
+		hZDP[ev.c][k]->Fill(event->fTreeData()->fZDCInfo.fZPEnergy[k]);
 
-		// -----------------------------------------------------------
-		// 2D-cross cross-correlations
+		// AD
+		hADCharge[ev.c][k]->Fill(event->fTreeData()->fADInfo.fCharge[k]);
+		hADTime[ev.c][k]->Fill(event->fTreeData()->fADInfo.fTime[k]);
 
-		// First observable
-		for (Int_t i = 0; i < d_; ++i) {
+		// V0
+		hV0Charge[ev.c][k]->Fill(event->fTreeData()->fV0Info.fCharge[k]);
+		hV0Time[ev.c][k]->Fill(event->fTreeData()->fV0Info.fTime[k]);
 
-			Double_t OBS_i = GetObservable(event, i);
 
-			// Second observable
-			for (Int_t j = i; j < d_; ++j) {
+		// 2D
+		h2ADCT[ev.c][k]->Fill(event->fTreeData()->fADInfo.fTime[k], event->fTreeData()->fADInfo.fCharge[k]);
+		h2V0CT[ev.c][k]->Fill(event->fTreeData()->fV0Info.fTime[k], event->fTreeData()->fV0Info.fCharge[k]);
+	}
 
-				Double_t OBS_j = GetObservable(event, j);
-				h2XC[ev.c][i][j]->Fill(OBS_i, OBS_j);
-			}
+
+	// -----------------------------------------------------------
+	// 2D-cross cross-correlations
+
+	// First observable
+	for (Int_t i = 0; i < d_; ++i) {
+
+		Double_t OBS_i = GetObservable(event, i);
+
+		// Second observable
+		for (Int_t j = i; j < d_; ++j) {
+
+			Double_t OBS_j = GetObservable(event, j);
+			h2XC[ev.c][i][j]->Fill(OBS_i, OBS_j);
 		}
-
-	} // Histograms end here
-
+	}
 }
 
 

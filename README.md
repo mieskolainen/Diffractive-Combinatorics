@@ -24,6 +24,7 @@ mikael.mieskolainen@cern.ch, 2019
 - <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</a> (FYI: algorithms here are fully experiment generic)
 - <a href="https://gitlab.cern.ch/RooUnfold/RooUnfold">RooUnfold</a> (in /libs, no license)
 - <a href="https://github.com/ben-strasser/fast-cpp-csv-parser">csv parser</a> (in /libs, BSD-3 license)
+- <a href="https://github.com/jarro2783/cxxopts">cxxopts CLI parser</a> (in /libs, MIT license)
 
 In general, one needs to modify Makefile a bit for your local installation. See Makefile for instructions.
 
@@ -51,3 +52,4 @@ make superclean
 make dictionary
 make -j4
 ```
+

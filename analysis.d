@@ -175,7 +175,7 @@ analysis.o: analysis.cc \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TLegend.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TPave.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TBox.h \
- include/Combinatorics.h
+ include/Combinatorics.h libs/cxxopts.hpp
 
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TROOT.h:
 
@@ -538,3 +538,5 @@ include/VecOper.h:
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TBox.h:
 
 include/Combinatorics.h:
+
+libs/cxxopts.hpp:
