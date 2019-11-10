@@ -14,6 +14,23 @@
 # mikael.mieskolainen@cern.ch, 2018
 # Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 #
+# -----------------------------------------------------------------------
+# ALICE installation (ROOT5 based legacy setup which is tested to work)
+# 
+# cd ~
+# mkdir alice && cd alice
+# aliBuild init
+# aliBuild build AliPhysics --defaults user
+# 
+# aliBuild init
+# aliBuild build RooUnfold
+#
+# -----------------------------------------------------------------------
+# BASH SETUP
+#
+# ALICE_WORK_DIR=$HOME/alice/sw; eval "`alienv shell-helper`"
+# alienv enter RooUnfold/latest AliPhysics/latest
+#
 # USE [TABS] for intendation while modifying this!
 
 
@@ -21,14 +38,14 @@
 # Basic paths
 
 # HepMC2 installation path
-HEPMC2DIR            = /home/user/cernbox/Granite/HepMC-2.06.09/install
+HEPMC2DIR            = /home/user/HepMC-2.06.09/install
 
 # ROOT installation path
 ROOTLIBDIR           = $(shell root-config --libdir)
 
 # AliROOT/AliPhysics path
-ALIROOT              = /home/user/alice/sw/ubuntu1604_x86-64/AliRoot/0-1
-ALIPHYSICS           = /home/user/alice/sw/ubuntu1604_x86-64/AliPhysics/0-1
+ALIROOT              = /home/user/alice/sw/ubuntu1804_x86-64/AliRoot/latest
+ALIPHYSICS           = /home/user/alice/sw/ubuntu1804_x86-64/AliPhysics/latest
 
 # RooUnfold local path
 ROOUNFOLD            = /home/user/alice/RooUnfold
@@ -41,7 +58,7 @@ HEPMC2LIB            = -L$(HEPMC2DIR)/lib -lHepMC
 HEPMC2FIOLIB         = -L$(HEPMC2DIR)/lib -lHepMCfio
 
 # ROOT libraries
-ROOTlib              = -L$(ROOTLIBDIR) -lCore -lCint -lRIO -lNet \
+ROOTlib              = -L$(ROOTLIBDIR) -lCore -lRIO -lNet \
                        -lHist -lGraf -lGraf3d -lGpad -lTree -lRint \
                        -lPostscript -lMatrix -lPhysics -lMathCore \
                        -lThread -lGui -lRooFit -lMinuit -lEG
@@ -49,7 +66,6 @@ ROOTlib              = -L$(ROOTLIBDIR) -lCore -lCint -lRIO -lNet \
 # ALICE libraries
 ALIROOTlib           = -L$(ALIROOT)/lib -lESD -lSTEER -lSTEERBase -lANALYSISalice -lANALYSIS
 ALIPHYSICSlib        = -L$(ALIPHYSICS)/lib -lOADB
-
 ROOUNFOLDlib         = -L/home/user/alice/sw/BUILD/RooUnfold-latest/RooUnfold -lRooUnfold
 
 
@@ -78,8 +94,12 @@ INCLUDES   =  -I.
 INCLUDES   += -Iinclude
 INCLUDES   += -Ilibs
 INCLUDES   +=  $(STANDARDlib)
+
+# ROOT/ALIROOT
 INCLUDES   += -I$(ROOTSYS)/include -I$(ALIROOT)/include -I$(ALIPHYSICS)/include -I$(ROOUNFOLD)/include
-INCLUDES   += -I$(HEPMC2DIR)/include
+
+# HEPMC2
+#INCLUDES   += -I$(HEPMC2DIR)/include
 
 
 # -----------------------------------------------------------------------------
@@ -89,7 +109,8 @@ LINK_LIBS  =  $(ROOTlib)
 LINK_LIBS  += $(ALIROOTlib)
 LINK_LIBS  += $(ALIPHYSICSlib)
 LINK_LIBS  += $(ROOUNFOLDlib)
-LINK_LIBS  += $(HEPMC2LIB)
+
+#LINK_LIBS  += $(HEPMC2LIB)
 
 
 # ------------------------------------------------------------------------

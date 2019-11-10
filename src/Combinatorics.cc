@@ -1685,7 +1685,7 @@ void Combinatorics::Plot() {
 
 			TCanvas* ccx = new TCanvas(Form("ccx_%s",fMCName_.Data()), "SDMass", 500, 280);
 			ccx->Divide(2,1);
-			TLegend legW2[2] = TLegend(0.35,0.73, 0.82,0.87);
+			TLegend legW2[2] = {TLegend(0.35,0.73, 0.82,0.87), TLegend(0.35,0.73, 0.82,0.87)};
 
 			for (UInt_t kk = 0; kk < 2; ++kk) {
 				ccx->cd(kk+1);
@@ -1707,8 +1707,8 @@ void Combinatorics::Plot() {
 
 			TCanvas* ccx2 = new TCanvas(Form("ccx2_%s",fMCName_.Data()), "SDMass", 500, 280);
 			ccx2->Divide(2,1);
-			TLegend legW22[2] = TLegend(0.45,0.73, 0.82,0.87);
-
+			TLegend legW22[2] = {TLegend(0.45,0.73, 0.82,0.87), TLegend(0.45,0.73, 0.82,0.87)};
+			
 			for (UInt_t kk = 0; kk < 2; ++kk) {
 				ccx2->cd(kk+1);
 				ccx2->cd(kk+1)->SetLogy();

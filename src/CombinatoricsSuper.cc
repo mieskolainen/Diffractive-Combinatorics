@@ -296,7 +296,7 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	delete cC;
 	delete cE;
 
-	if (~BG_substraction) {
+	if (!BG_substraction) {
 		printf("Beam-Gas correction OFF \n");
 		scaleA = 0;
 		scaleC = 0;
@@ -1179,7 +1179,7 @@ std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, I
 	// Construct the MC efficiencies
 	for (Int_t j = 0; j < C_; ++j) {    	// Loop over processes
 
-		effVec[j] = 1 - F.at(0).at(j); 		// Save the efficiency
+		effVec(j,1) = 1.0 - F.at(0).at(j); 	// Save the efficiency
 
 		// IMPORTANT, make sure that the 0-bin is nullified out of the density matrix,
 		// at the level of visible (1), or fiducial (2)
@@ -1197,7 +1197,7 @@ std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, I
 		}
 
 		if (!(sum > EPS)) {
-			effVec[j] = 0; // This process is null (MC does not include it)
+			effVec(j,1) = 0.0; // This process is null (MC does not include it)
 		}
 	}
 
@@ -1685,7 +1685,7 @@ std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, I
 	// Total inelastic extrapolation visualization
 
 	if (final_round) {
-
+	
 	// Vectors
 	std::vector<Double_t> inel_vals; // Total inelastic values
 	std::vector<Double_t> L_vals;    // Lagrangian cost for the total inelastic

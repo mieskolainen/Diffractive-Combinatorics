@@ -26,4 +26,5 @@ mikael.mieskolainen@cern.ch, 2019
 - <a href="http://hepunx.rl.ac.uk/~adye/software/unfold/RooUnfold.html">ROOUnfold</a> (in /libs)
 - <a href="https://github.com/ben-strasser/fast-cpp-csv-parser">csv parser</a> (in /libs, BSD-3 license)
 
-In general, one needs to modify Makefile for your local installation.
+In general, one needs to modify Makefile for your local installation. See Makefile for instructions.
+
