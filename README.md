@@ -19,7 +19,6 @@ For reference, you may cite the paper above.
 
 mikael.mieskolainen@cern.ch, 2019
 
-
 ## External dependencies:
 
 - <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</a> (FYI: algorithms here are fully experiment generic)
