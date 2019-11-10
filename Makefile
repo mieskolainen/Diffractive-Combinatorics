@@ -21,8 +21,6 @@
 # mkdir alice && cd alice
 # aliBuild init
 # aliBuild build AliPhysics --defaults user
-# 
-# aliBuild init
 # aliBuild build RooUnfold
 #
 # -----------------------------------------------------------------------
