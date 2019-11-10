@@ -26,6 +26,12 @@
 #include "TF1.h"
 #include "TLegend.h"
 
+// RooUnfold
+#include "RooUnfoldResponse.h"
+#include "RooUnfoldBayes.h"
+#include "RooUnfoldSvd.h"
+#include "RooUnfoldTUnfold.h"
+#include "RooUnfoldBinByBin.h"
 
 // Own headers
 #include "AliAnalysisTaskDiffCrossSectionsMM.h"

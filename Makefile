@@ -13,21 +13,6 @@
 #
 # mikael.mieskolainen@cern.ch, 2018
 # Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-#
-# -----------------------------------------------------------------------
-# ALICE installation (ROOT5 based legacy setup which is tested to work)
-# 
-# cd ~
-# mkdir alice && cd alice
-# aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot5
-# 
-# -----------------------------------------------------------------------
-# BASH SETUP
-#
-# ALICE_WORK_DIR=$HOME/alice/sw; eval "`alienv shell-helper`"
-# alienv enter AliPhysics/latest
-#
-# USE [TABS] for intendation while modifying this!
 
 
 # -----------------------------------------------------------------------
@@ -43,8 +28,13 @@ ROOTLIBDIR           = $(shell root-config --libdir)
 ALIROOT              = /home/user/alice/sw/ubuntu1804_x86-64/AliRoot/latest
 ALIPHYSICS           = /home/user/alice/sw/ubuntu1804_x86-64/AliPhysics/latest
 
+
+# -----------------------------------------------------------------------
+# Local (this path) libraries
+
 # RooUnfold local path
-ROOUNFOLD            = /home/user/alice/RooUnfold
+ROOUNFOLD            = ./libs/RooUnfold
+
 
 # ------------------------------------------------------------------------
 # Libraries (compiled)
@@ -54,7 +44,7 @@ HEPMC2LIB            = -L$(HEPMC2DIR)/lib -lHepMC
 HEPMC2FIOLIB         = -L$(HEPMC2DIR)/lib -lHepMCfio
 
 # ROOT libraries
-ROOTlib              = -L$(ROOTLIBDIR) -lCore -lRIO -lNet \
+ROOTlib              = -L$(ROOTLIBDIR) -lCore -lRIO -lCint -lNet \
                        -lHist -lGraf -lGraf3d -lGpad -lTree -lRint \
                        -lPostscript -lMatrix -lPhysics -lMathCore \
                        -lThread -lGui -lRooFit -lMinuit -lEG
@@ -62,7 +52,7 @@ ROOTlib              = -L$(ROOTLIBDIR) -lCore -lRIO -lNet \
 # ALICE libraries
 ALIROOTlib           = -L$(ALIROOT)/lib -lESD -lSTEER -lSTEERBase -lANALYSISalice -lANALYSIS
 ALIPHYSICSlib        = -L$(ALIPHYSICS)/lib -lOADB
-ROOUNFOLDlib         = -L/home/user/alice/sw/BUILD/RooUnfold-latest/RooUnfold -lRooUnfold
+ROOUNFOLDlib         = -L$(ROOUNFOLD) -lRooUnfold
 
 
 # C++ standard libraries
@@ -92,7 +82,10 @@ INCLUDES   += -Ilibs
 INCLUDES   +=  $(STANDARDlib)
 
 # ROOT/ALIROOT
-INCLUDES   += -I$(ROOTSYS)/include -I$(ALIROOT)/include -I$(ALIPHYSICS)/include -I$(ROOUNFOLD)/include
+INCLUDES   += -I$(ROOTSYS)/include -I$(ALIROOT)/include -I$(ALIPHYSICS)/include
+
+# ROOUNFOLD
+INCLUDES   += -I$(ROOUNFOLD)/src
 
 # HEPMC2
 #INCLUDES   += -I$(HEPMC2DIR)/include

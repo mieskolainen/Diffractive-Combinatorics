@@ -23,8 +23,22 @@ mikael.mieskolainen@cern.ch, 2019
 #### External dependencies:
 
 - <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</a> (FYI: algorithms here are fully experiment generic)
-- <a href="http://hepunx.rl.ac.uk/~adye/software/unfold/RooUnfold.html">ROOUnfold</a> (in /libs)
+- <a href="https://gitlab.cern.ch/RooUnfold/RooUnfold">ROOUnfold</a> (in /libs, no license)
 - <a href="https://github.com/ben-strasser/fast-cpp-csv-parser">csv parser</a> (in /libs, BSD-3 license)
 
 In general, one needs to modify Makefile for your local installation. See Makefile for instructions.
 
+#### SETUP
+
+# 1. AliPhysics/AliROOT installation (ROOT5 based legacy setup which is tested to work)
+
+cd ~
+mkdir alice && cd alice
+aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot5
+
+# 2. Compile
+
+source setenv.sh
+cd ./libs/RooUnfold && make && cd ../..
+make dictionary
+make -j4

@@ -145,16 +145,14 @@ analysis.o: analysis.cc \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TBrowser.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TBrowserImp.h \
  /home/user/alice/sw/ubuntu1804_x86-64/AliPhysics/latest/include/AliAnalysisUtils.h \
- include/Combinatorics.h \
- /home/user/alice/RooUnfold/include/RooUnfoldResponse.h \
+ include/Combinatorics.h libs/RooUnfold/src/RooUnfoldResponse.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixD.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDfwd.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDUtils.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDUtilsfwd.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TH1.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TVectorDfwd.h \
- /home/user/alice/RooUnfold/include/RooUnfoldBayes.h \
- /home/user/alice/RooUnfold/include/RooUnfold.h \
+ libs/RooUnfold/src/RooUnfoldBayes.h libs/RooUnfold/src/RooUnfold.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TVectorD.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TVectorT.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixTSym.h \
@@ -163,17 +161,17 @@ analysis.o: analysis.cc \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDSymfwd.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDSparse.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDSparsefwd.h \
- /home/user/alice/RooUnfold/include/RooUnfoldResponse.h \
- /home/user/alice/RooUnfold/include/RooUnfoldSvd.h \
- /home/user/alice/RooUnfold/include/RooUnfoldTUnfold.h \
+ libs/RooUnfold/src/RooUnfoldResponse.h libs/RooUnfold/src/RooUnfoldSvd.h \
+ libs/RooUnfold/src/TSVDUnfold_local.h \
+ libs/RooUnfold/src/RooUnfoldTUnfold.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TUnfold.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TH2D.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TSpline.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TGraph.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDSparse.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TObjArray.h \
- /home/user/alice/RooUnfold/include/RooUnfoldBinByBin.h \
- include/CombEvent.h include/VecOper.h \
+ libs/RooUnfold/src/RooUnfoldBinByBin.h include/CombEvent.h \
+ include/VecOper.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TLegend.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TPave.h \
  /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TBox.h \
@@ -473,7 +471,7 @@ include/AliAnalysisTaskDiffCrossSectionsMM.h:
 
 include/Combinatorics.h:
 
-/home/user/alice/RooUnfold/include/RooUnfoldResponse.h:
+libs/RooUnfold/src/RooUnfoldResponse.h:
 
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixD.h:
 
@@ -487,9 +485,9 @@ include/Combinatorics.h:
 
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TVectorDfwd.h:
 
-/home/user/alice/RooUnfold/include/RooUnfoldBayes.h:
+libs/RooUnfold/src/RooUnfoldBayes.h:
 
-/home/user/alice/RooUnfold/include/RooUnfold.h:
+libs/RooUnfold/src/RooUnfold.h:
 
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TVectorD.h:
 
@@ -507,11 +505,13 @@ include/Combinatorics.h:
 
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TMatrixDSparsefwd.h:
 
-/home/user/alice/RooUnfold/include/RooUnfoldResponse.h:
+libs/RooUnfold/src/RooUnfoldResponse.h:
 
-/home/user/alice/RooUnfold/include/RooUnfoldSvd.h:
+libs/RooUnfold/src/RooUnfoldSvd.h:
 
-/home/user/alice/RooUnfold/include/RooUnfoldTUnfold.h:
+libs/RooUnfold/src/TSVDUnfold_local.h:
+
+libs/RooUnfold/src/RooUnfoldTUnfold.h:
 
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TUnfold.h:
 
@@ -525,7 +525,7 @@ include/Combinatorics.h:
 
 /home/user/alice/sw/ubuntu1804_x86-64/ROOT/v5-34-30-alice10-1/include/TObjArray.h:
 
-/home/user/alice/RooUnfold/include/RooUnfoldBinByBin.h:
+libs/RooUnfold/src/RooUnfoldBinByBin.h:
 
 include/CombEvent.h:
 
