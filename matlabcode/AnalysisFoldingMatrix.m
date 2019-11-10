@@ -40,13 +40,13 @@ for i = 1:size(X,1)
         value = X(j,i);
         if (value > THRESH)
         space = '';
-        if (value < 10)
+        if (round(value) < 10)
             space = ' ';
         end
         
-        color = [1 1 1];
-        if (value > 50)
         color = [0 0 0];
+        if (value > 50)
+        color = [1 1 1];
         end
         
         text(i-1.4, j-1, sprintf('%s%0.0f', space,value),'color',color,'fontsize', 5);
@@ -77,6 +77,7 @@ h.XAxis.TickLength = [0 0];
 h.YAxis.TickLength = [0 0];
 
 axis square;
+colormap(flipud(hot(256)));
 %colormap(hot(256));
 %colorbar;
 caxis([0 100]);
