@@ -3,8 +3,9 @@
 //
 // The classes are compiled. User might need to slightly modify classes
 // to incorporate spesific runs, i.e., include run numbers, trigger masks etc.
-//
-//
+// under CombinatoricsSuper::Initialize
+// 
+// -----------------------------------------------------------------------
 // Reading TTree directly (for a quick debug):
 // For example:
 // TE->Draw("","(fEventInfo.fClassMask & (1<<20)) != 0 && fADInfo.fDecisionOffline[0] == 1
@@ -19,14 +20,9 @@
 // then use "kcachegrind" to read it
 //
 // use -pg switch with g++
-//  
-// DEVELOPE:
+// -----------------------------------------------------------------------
 // 
-// - Add to output print the detector low-level timing etc. cuts, masked SPD chips etc.
-// - Print out the folding matrix for MATLAB analysis
-// 
-//
-// mikael.mieskolainen@cern.ch, 2018
+// mikael.mieskolainen@cern.ch, 2019
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 
@@ -59,28 +55,30 @@ void SetPlotStyle();
 int main(void) {
 
   printf("\n\n\nCombinatorial Diffractive Cross Section Analysis \n");
-  printf("mikael.mieskolainen@cern.ch, 2018 \n\n\n");
+  printf("mikael.mieskolainen@cern.ch, 2019 \n\n\n");
   
-
   // Supress enum MsgLevel { DEBUG=0, INFO=1, PROGRESS=2, WARNING=3, ERROR=4, FATAL=5 };
   gErrorIgnoreLevel = kWarning;
-
 
   SetROOTStyle();
   SetPlotStyle();
 
-  // Set runs
-  std::vector<UInt_t> runs = {274593, 274594, 274595};
-
-
   TStopwatch watch;
   watch.Start();
 
-  // Histogramming on
-  HISTOGRAMS_ON = kTRUE;
+  // ********************************************************************
 
   // Database working directory
   const TString base_path   = "/home/user/cernbox/ALICE/diffxsdata";
+
+  // Set runs
+  std::vector<UInt_t> runs = {274593};//, 274594, 274595};
+
+  // Histogramming on
+  HISTOGRAMS_ON = kFALSE;
+
+  // VERBOSE PRINTING
+  VERBOSE_ON = kFALSE;
 
   // Pure generator level study (SKIPS GEANT SIMUATION, ONLY FOR DEBUG!)
   // GENERATOR_LEVEL = kFALSE;
@@ -90,31 +88,37 @@ int main(void) {
   GAPFLOW_N  = 100;         // Discretization
   GAPFLOW_MAXSCALE = 10.0;  // Maximum scale
 
-
   // Set maximum fraction [0 ... 1] of data or mc (for speed)
-  MAXEVENTS_DATA = 1.0;
-  MAXEVENTS_MC   = 1.0;
-
-
-  // VERBOSE PRINTING
-  VERBOSE_ON = kFALSE;
-
+  MAXEVENTS_DATA = 0.01;
+  MAXEVENTS_MC   = 0.01;
 
   // Skip central diffraction
   SKIP_CD = kTRUE;
-
 
   // Folding matrix construction mode (1 = Charged only, 2 == Charged+Neutral, 3 = Neutral only)
   FOLDING_MODE = 1;
   PT_MIN = 0.050; // At least one particle within fiducial window above this (GeV)
 
-
   // Double Diffraction kinematics cutoff mode (0 standard, 1 separate)
   DD_XIMAX_MODE = 0;
 
+  // Number of bootstrap samples
   N_BOOTSTRAP = 100;
   FASTSTAT = kTRUE;
 
+  // Fixed (default) number of unfold-iterations
+  UNFOLD_ITER = 5;
+
+  // Fixed number of EM-iterations in cross section fits (at least 50 is usually enough)
+  N_EM_ITER = 50;
+
+  // (DELTA,XI) scans
+  SCAN_PARAMETERS = kTRUE;
+  MINUIT_ON       = kFALSE;
+  VERBOSE_ON      = kFALSE;
+  SCAN_ND         = 6;      // Discretization
+
+  // ********************************************************************
 
   // Loop over runs
   for (UInt_t i = 0; i < runs.size(); ++i) {
@@ -125,18 +129,14 @@ int main(void) {
     // Initialize and Run
     cSuperObj->Initialize(runs[i]);
 
-
     // HERE BE CAREFUL, BECAUSE AFTER REFITTING HAS BEEN DONE, THE MODEL
     // DEFINITIONS ARE DIFFERENT. THIS NEEDS TO BE FIXED TO MORE ROBUST!
 
-
     // ===================================================================
-    // EM with DATA as input
-    // input = 0; // Data
-    // input = 2; // Pythia 6
-
-    // No Regge parameter scans
-    SCAN_PARAMETERS = kFALSE;
+    // EM cross section extraction
+    //
+    // For 274593, 274594, 274595
+    // 0 = data, 1 = Pythia, 2 = Phojet (See CombinatoricsSuper::Initialize)
 
     for (UInt_t input = 0; input <= 0; ++input) {
       for (UInt_t model = 1; model <= 2; ++model) {
@@ -201,32 +201,3 @@ void SetPlotStyle() {
   gStyle->SetLabelOffset(0.025);
 
 }
-
-
-
-/*
-  gErrorIgnoreLevel = kWarning;
-
-  // Tell compiler where to find AliROOT's libraries
-  // N.B. the order for own libraries must be right!
-  // Add aliroot include path--------------------------------------------------
-  gROOT->ProcessLine(Form(".include %s/include", gSystem->ExpandPathName("$ROOTSYS")));
-  gROOT->ProcessLine(Form(".include %s/include", gSystem->ExpandPathName("$ALICE_ROOT")));
-  gROOT->ProcessLine(Form(".include %s/include", gSystem->ExpandPathName("$ALICE_PHYSICS")));
-  gROOT->ProcessLine(".include /home/user/cernbox/ALICE/gridclass");
-  gROOT->ProcessLine(".include /home/user/cernbox/ALICE/RooUnfold-1.1.1/src");
-
-  // Own grid task
-  gROOT->LoadMacro("/home/user/cernbox/ALICE/gridclass/AliAnalysisTaskDiffCrossSectionsMM.cxx+");
-
-  // RooUnfold
-  gSystem->Load("libRooUnfold");
-
-  // Own classes
-  gROOT->LoadMacro("AliSPDGeometryUtils.cxx+");
-  gROOT->LoadMacro("VecOper.cxx+");
-  gROOT->LoadMacro("CutFlow.cxx+");
-  gROOT->LoadMacro("CombEvent.cxx+");
-  gROOT->LoadMacro("Combinatorics.cxx+");
-  gROOT->LoadMacro("CombinatoricsSuper.cxx+");
-*/

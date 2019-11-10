@@ -37,26 +37,30 @@
 using namespace VecOper;
 
 
+// ***********************************************************************
+// Default analysis parameters
+
 const Double_t MC_SIGMA_INEL = 80.0;  // N.B. only for reference (80.0 mb by default)
-                                      // this affects only pure MC numbers -> no single effect on data analysis (easily tested by changing it)
+                                      // this affects only pure MC numbers
+									  // -> no single effect on data analysis (easily tested by changing it)
 
-
-// These affect analysis
+// These set the analysis default without parameter scans
 const Double_t DEFAULT_POMERON_DELTA = 0.085;
 const Double_t DEFAULT_XI_MAX = 0.05;
 
+// Fixed (default) number of unfold-iterations
+Int_t UNFOLD_ITER = 5;
 
 // Fixed number of EM-iterations in cross section fits (at least 50 is usually enough)
 Int_t N_EM_ITER = 50;
 
-// Fixed number of unfold-iterations
-Int_t UNFOLD_ITER = 5;
-
-
 // (DELTA,XI) scans
-Bool_t SCAN_PARAMETERS = kFALSE;
-Bool_t VERBOSE_ON = kFALSE;
-Bool_t MINUIT_ON = kFALSE;
+Bool_t SCAN_PARAMETERS = kTRUE;
+Bool_t MINUIT_ON       = kTRUE;
+Bool_t VERBOSE_ON      = kFALSE;
+Int_t  SCAN_ND         = 30; // Discretization
+
+// ***********************************************************************
 
 
 // "Globals" for Minuit
@@ -848,6 +852,7 @@ void CombinatoricsSuper::ratioplot(TCanvas*& c, TPad*& pad1, TPad*& pad2) {
 // Expectation-Maximization (Maximum Marginal Likelihood) iteration
 void CombinatoricsSuper::EstimateEM(Int_t data_index, Int_t MC_index) {
 
+	// IMPORTANT; CLEAR HERE FIRST!
 	printf("CombinatoricsSuper::EstimateEM:: \n");
 
 	if (data_index > (Int_t) (sources_.size() - 1) || data_index < 0) {
@@ -859,7 +864,11 @@ void CombinatoricsSuper::EstimateEM(Int_t data_index, Int_t MC_index) {
 		return;
 	}
 
-
+	printf("Clearing XSlevel1/2/3 objects \n");
+	XSlevel1.clear();
+	XSlevel2.clear();
+	XSlevel3.clear();
+	
 	printf("\n\n======================= Max Likelihood-ESTIMATION =============================\n");
 	printf("Test input: %s, MC model: %s \n", sources_.at(data_index)->GetName().Data(),
 										      sources_.at(MC_index)->GetName().Data());
@@ -883,9 +892,8 @@ void CombinatoricsSuper::EstimateEM(Int_t data_index, Int_t MC_index) {
 	
 	// Differential mass distribution reweighting parameter range
 	// linspace(a,b,n)
-	const int ND = 30; // Discretization
-	std::vector<Double_t> delta_range  = linspace(0.0, 0.15,  ND);
-	std::vector<Double_t> deltaY_range = linspace(1e-3,  7,   ND); // do not put exactly 0 lower bound -> unphysical
+	std::vector<Double_t> delta_range  = linspace(0.0, 0.15,  SCAN_ND);
+	std::vector<Double_t> deltaY_range = linspace(1e-3,  7,   SCAN_ND); // do not put exactly 0 lower bound -> unphysical
 	
 	// If parameter scanning off -> Use default values of (DELTA,XIMAX)
 	if (!SCAN_PARAMETERS) {
@@ -1723,7 +1731,7 @@ std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, I
 
 		// These are fixed
 		best_eff[3] = effVec[3][0] + 1e-12; // CD process efficiency from MC
-		best_eff[4] = effVec[4][0]; // ND process efficiency from MC (almost ~100%)
+		best_eff[4] = effVec[4][0]; // SCAN_ND process efficiency from MC (almost ~100%)
 
 		// The efficiency range from SD_eff_min to 0.99
 		for (Double_t eff_SDL = SD_eff_min; eff_SDL < 0.99; eff_SDL += 0.005) {

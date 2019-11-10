@@ -31,20 +31,12 @@
 #include "CombEvent.h"
 
 
-// Fixed number of EM-iterations (at least 50 is usually enough)
 extern Int_t N_EM_ITER;
-
-// Fixed number of unfold-iterations
 extern Int_t UNFOLD_ITER;
-
-// (DELTA,XI) scans
 extern Bool_t SCAN_PARAMETERS;
-
-// Superfluous prints
 extern Bool_t VERBOSE_ON;
-
-// Minuit on
 extern Bool_t MINUIT_ON;
+extern Int_t  SCAN_ND;
 
 
 // Integrated Cross Section object
