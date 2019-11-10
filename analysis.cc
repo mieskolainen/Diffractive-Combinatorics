@@ -111,8 +111,8 @@ int main(void) {
 
   // Fixed number of EM-iterations in cross section fits (at least 50 is usually enough)
   N_EM_ITER = 50;
-
-  // (DELTA,XI) scans
+  
+  // (POMERON DELTA, XIMAX) scans
   SCAN_PARAMETERS = kTRUE;
   MINUIT_ON       = kFALSE;
   VERBOSE_ON      = kFALSE;
