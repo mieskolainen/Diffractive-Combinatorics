@@ -44,6 +44,7 @@ aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot
 ```bash
 source setenv.sh
 cd ./libs/RooUnfold && make && cd ../..
+make superclean
 make dictionary
 make -j4
 ```
