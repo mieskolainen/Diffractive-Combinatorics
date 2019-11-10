@@ -32,6 +32,8 @@ In general, one needs to modify Makefile a bit for your local installation. See 
 
 ### 1. AliPhysics/AliROOT installation (ROOT5 based setup is tested to work)
 
+Tested on Ubuntu 18
+
 ```bash
 cd ~
 mkdir alice && cd alice
@@ -40,6 +42,8 @@ aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot
 
 
 ### 2. Compile
+
+Tested on Ubuntu 18
 
 ```bash
 source setenv.sh
