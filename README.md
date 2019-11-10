@@ -20,7 +20,7 @@ For reference, you may cite the paper above.
 mikael.mieskolainen@cern.ch, 2019
 
 
-#### External dependencies:
+## External dependencies:
 
 - <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</a> (FYI: algorithms here are fully experiment generic)
 - <a href="https://gitlab.cern.ch/RooUnfold/RooUnfold">ROOUnfold</a> (in /libs, no license)
@@ -30,13 +30,13 @@ In general, one needs to modify Makefile for your local installation. See Makefi
 
 #### SETUP
 
-# 1. AliPhysics/AliROOT installation (ROOT5 based legacy setup which is tested to work)
+### 1. AliPhysics/AliROOT installation (ROOT5 based legacy setup which is tested to work)
 
 cd ~
 mkdir alice && cd alice
 aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot5
 
-# 2. Compile
+### 2. Compile
 
 source setenv.sh
 cd ./libs/RooUnfold && make && cd ../..
