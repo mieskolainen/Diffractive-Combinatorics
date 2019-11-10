@@ -32,13 +32,18 @@ In general, one needs to modify Makefile a bit for your local installation. See 
 
 ### 1. AliPhysics/AliROOT installation (ROOT5 based setup is tested to work)
 
+```bash
 cd ~
 mkdir alice && cd alice
 aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot5
+```
+
 
 ### 2. Compile
 
+```bash
 source setenv.sh
 cd ./libs/RooUnfold && make && cd ../..
 make dictionary
 make -j4
+```
