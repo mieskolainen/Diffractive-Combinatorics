@@ -1,0 +1,254 @@
+############################################
+## global settings & macros
+############################################     
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  PYTHONUNBUFFERED: 1
+  
+stages:
+  - build
+  - test
+  - doc
+  - deploy
+
+.latex: &latex
+  stage: doc
+  image: blang/latex:ubuntu
+
+.doxygen: &doxygen
+  stage: doc
+  image: rootproject/root-ubuntu16  
+  before_script:
+    - sudo apt-get update
+    - sudo apt-get install -y doxygen texlive-font-utils
+
+.atlas: &atlas
+  image: atlas/analysisbase:21.2.64
+  before_script:
+    - source /home/atlas/release_setup.sh
+
+.standalone: &standalone    
+  image: rootproject/root-ubuntu16  
+
+.ctest: &ctest  
+  stage: test
+  script:
+    - cd build
+    - source setup.sh
+    - ctest --output-on-failure
+  artifacts:
+    when: on_failure
+    paths:
+      - "*.ref"    
+
+.atlasctest: &atlasctest  
+  stage: test
+  script:
+    - cd build
+    - source ${AnalysisBase_PLATFORM}/setup.sh
+    - TERM=vt100 ctest --output-on-failure
+  artifacts:
+    when: on_failure
+    paths:
+      - "*.ref"    
+
+.atlascmake: &atlascmake    
+  stage: build
+  script:
+    - mkdir source 
+    - mkdir source/RooUnfold 
+    - ls | grep -v source | xargs -i mv {} source/RooUnfold/
+    - mv source/RooUnfold/CMakeLists_forAtlasCI.txt source/CMakeLists.txt
+    - mkdir build
+    - cd build
+    - cmake ../source
+    - make
+  artifacts:
+    paths:
+      - build
+      - source
+
+.cmake: &cmake    
+  stage: build
+  script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
+  artifacts:
+    paths:
+      - build
+
+.GNUmake: &GNUmake    
+  stage: build
+  script:
+    make -j1
+  artifacts:
+    paths:
+      - libRooUnfold.so
+      - RooUnfoldDict_rdict.pcm
+      - libRooUnfold.rootmap
+
+.GNUtest: &GNUtest          
+  stage: test
+  script:
+    - python -u examples/RooUnfoldExample.py > RooUnfoldExample.ref
+    - diff RooUnfoldExample.ref ref/RooUnfoldExample.py.bayes.ref
+  artifacts:
+    when: on_failure    
+    paths:
+      - "*.ref"        
+
+.dAgostini: &dAgostini
+  <<: *standalone
+  before_script:
+    - sudo apt-get update
+    - sudo apt-get install wget
+    - export FC=gfortran
+    - bash get_dagos_bayes.sh
+    
+############################################
+## building
+############################################     
+    
+compile_atlas:
+  <<: *atlas
+  <<: *atlascmake
+
+compile_cmake:
+  <<: *standalone
+  <<: *cmake
+
+compile_GNUmake:
+  <<: *standalone
+  <<: *GNUmake  
+
+compile_cmake_dAgostini:
+  <<: *dAgostini
+  <<: *cmake
+  
+compile_GNUmake_dAgostini:
+  <<: *dAgostini
+  <<: *GNUmake  
+
+
+############################################           
+## testing      
+############################################
+
+test_atlas:
+  <<: *atlas
+  <<: *atlasctest  
+  dependencies:
+    - compile_atlas    
+
+test_cmake:
+  <<: *standalone
+  <<: *ctest  
+  dependencies:
+    - compile_cmake
+
+test_GNUmake:
+  <<: *standalone
+  <<: *GNUtest
+  dependencies:
+    - compile_GNUmake
+
+############################################         
+## documentation
+############################################
+
+doxygen:
+  <<: *doxygen
+  artifacts:
+    paths:
+      - build/doxygen
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make doxygen
+
+document_help:
+  <<: *standalone
+  stage: doc
+  dependencies:
+    - compile_cmake
+  before_script:
+    - source build/setup.sh
+  script:
+    - set +e
+    - ./build/RooUnfoldTest   -h | awk '/^Usage:/,0{print $0"\r"}' > RooUnfoldTest.txt 
+    - ./build/RooUnfoldTest2D -h | awk '/^Usage:/,0{print $0"\r"}' > RooUnfoldTest2D.txt 
+    - ./build/RooUnfoldTest3D -h | awk '/^Usage:/,0{print $0"\r"}' > RooUnfoldTest3D.txt 
+    - set -e
+  artifacts:
+    paths:
+      - RooUnfoldTest*.txt
+
+doc_bayes_errors:
+  <<: *latex
+  script:
+    - cd doc/bayes_errors
+    - pdflatex bayes_errors.tex
+    - pdflatex bayes_errors.tex
+  artifacts:
+    paths:
+      - doc/bayes_errors/bayes_errors.pdf
+    
+doc_phystat2011:
+  <<: *latex
+  script:
+    - cd doc/phystat2011
+    - pdflatex phystat2011_adye.tex
+    - pdflatex phystat2011_adye.tex    
+  artifacts:
+    paths:
+      - doc/phystat2011/phystat2011_adye.pdf
+
+doc_unfolding2010:      
+  <<: *latex
+  script:
+    - cd doc/unfolding2010
+    - latex adye_tim.tex
+    - dvipdf adye_tim.dvi
+  artifacts:
+    paths:
+      - doc/unfolding2010/adye_tim.pdf
+      - doc/unfolding2010/adye_tim.pdf      
+
+############################################         
+## documentation
+############################################
+
+pages:
+   # Custom docker image providing the needed tools to deploy in DFS
+  image: gitlab-registry.cern.ch/ci-tools/ci-web-deployer:latest
+
+  script:
+  - mkdir -p public
+  - mv build/doxygen/html/* public
+  - mv doc/*/*.pdf public
+  - mv RooUnfoldTest*.txt public
+  - deploy-dfs
+
+  before_script: []
+  after_script: []
+
+  stage: deploy
+
+  dependencies:
+    - doxygen
+    - document_help
+    - doc_bayes_errors
+    - doc_phystat2011
+    - doc_unfolding2010
+
+  artifacts:
+    name: "RooUnfoldDoc_${CI_COMMIT_REF_NAME}"
+    expire_in: 6 mos
+    paths:
+    - public
+
+  when: manual

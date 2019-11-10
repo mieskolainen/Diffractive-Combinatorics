@@ -26,13 +26,13 @@ mikael.mieskolainen@cern.ch, 2019
 - <a href="https://gitlab.cern.ch/RooUnfold/RooUnfold">ROOUnfold</a> (in /libs, no license)
 - <a href="https://github.com/ben-strasser/fast-cpp-csv-parser">csv parser</a> (in /libs, BSD-3 license)
 
-In general, one needs to modify Makefile for your local installation. See Makefile for instructions.
+In general, one needs to modify Makefile a bit for your local installation. See Makefile for instructions.
 
-## SETUP
+## Install
 
 ### 1. AliPhysics/AliROOT installation (ROOT5 based setup is tested to work)
 
-cd ~ 
+cd ~
 mkdir alice && cd alice
 aliBuild init AliPhysics && aliBuild build AliPhysics --defaults user -z aliroot5
 
