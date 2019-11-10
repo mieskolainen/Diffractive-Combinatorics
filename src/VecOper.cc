@@ -39,7 +39,6 @@ namespace VecOper {
 // Do not delete this, it is within namespace -> scope reasonably safe!
 TRandom3* r = new TRandom3(123); // seed with 123
 
-
 // Print out Beam-Empty statistics
 void TriggerMaskStatistics(const std::vector<double>& xB,
 						   const std::vector<double>& xA,
@@ -74,7 +73,8 @@ void TriggerMaskStatistics(const std::vector<double>& xB,
 			xE.at(i),
 			x_corrected.at(i) / (double) xB.at(i));
 
-		// THIS SHOULD BE FIXED, IT IS NOT CORRECT MATHEMATICALLY NOW
+		// THIS SHOULD BE DONE IN THE FUTURE, BACKGROUND SUBTRACTION OF HISTOGRAMS
+
 		// Histograms for each combination
    		//CorrectBGHist1(cB->hSPDbit[i],  cA->hSPDbit[i],  cC->hSPDbit[i],  cE->hSPDbit[i],      scaleA, scaleC, scaleE);
    		//CorrectBGHist1(cB->hSPDFO[i],   cA->hSPDFO[i],   cC->hSPDFO[i],   cE->hSPDFO[i],       scaleA, scaleC, scaleE);

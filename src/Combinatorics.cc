@@ -637,8 +637,7 @@ void Combinatorics::PlotCodingScheme() {
 
 			Double_t value1 = 0;
 			Double_t value2 = 0;
-
-
+			
 			// Coding Scheme D = 8
 			if (d_ == 8) {
 				if (j == 0) {
