@@ -23,7 +23,7 @@ mikael.mieskolainen@cern.ch, 2019
 ## External dependencies:
 
 - <a href="https://alice-doc.github.io/alice-analysis-tutorial/building/">ALICE experiment software</a> (FYI: algorithms here are fully experiment generic)
-- <a href="https://gitlab.cern.ch/RooUnfold/RooUnfold">ROOUnfold</a> (in /libs, no license)
+- <a href="https://gitlab.cern.ch/RooUnfold/RooUnfold">RooUnfold</a> (in /libs, no license)
 - <a href="https://github.com/ben-strasser/fast-cpp-csv-parser">csv parser</a> (in /libs, BSD-3 license)
 
 In general, one needs to modify Makefile a bit for your local installation. See Makefile for instructions.
