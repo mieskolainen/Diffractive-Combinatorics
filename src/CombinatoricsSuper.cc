@@ -1,6 +1,6 @@
 // CombinatoricsSuper analysis class for Combinatorial Diffractive Cross Sections
 //
-// mikael.mieskolainen@cern.ch, 2018
+// mikael.mieskolainen@cern.ch, 2019
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 
@@ -21,7 +21,6 @@
 #include "TPaveText.h"
 #include "TGaxis.h"
 #include "TMinuit.h"
-
 
 // Own headers
 #include "AliAnalysisTaskDiffCrossSectionsMM.h"
@@ -256,7 +255,7 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	scaleE = (trdata["B"].LMb / trdata["E"].LMb) * (trdata["B"].L0aL0b / trdata["E"].L0aL0b);
 
 	printf("Trigger based scales: a = %0.3f, c = %0.3f, e = %0.3f \n", scaleA, scaleC, scaleE);
-	
+
 	printf("mu-value = %0.3E \n", -std::log(1.0 - trdata["B"].L0bLMb));
     // ----------------------------------------------------------------------------------
 	
@@ -272,7 +271,7 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	cB->Printx();
 
 	// Residual Beam-Gas substraction correction
-	
+
 	// EMPTY - A-side BEAM
 	Combinatorics* cA = new Combinatorics(Form("%s/%s/%d/AnalysisResults.root", 
 		base_path_.Data(), run_path[0].Data(), run_num[0]), "Data_A", isMC, 1.0, 0.0, run_num[0], trdata["A"]);
@@ -662,11 +661,11 @@ void CombinatoricsSuper::PlotAll1D() {
 
 		if (d_ == 6) {
 			// +2 from ZDN + ZDP on sides
-			can[k]->Divide(d_ + 2, 2, 0.01, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
+			can[k]->Divide(d_ + 2, 2, 0.0001, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
 		}
 		if (d_ == 8) {
 			// +2 from ZDN + ZDP on sides
-			can[k]->Divide(d_, 2, 0.01, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
+			can[k]->Divide(d_, 2, 0.0001, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
 		}
 	}
 	
@@ -1404,14 +1403,12 @@ std::vector<Double_t> CombinatoricsSuper::EMsub(std::vector<CrossSection>& xs, I
 
 		} // EM-iteration loop
 
-
 		// Get process probabilities with sum = 1
 		std::vector<Double_t> p(C_, 0);
 		for (Int_t s = 0; s < C_; ++s) {
 			p.at(s) = Pvec[s][0];
 		}
 		p = nvec(p);
-
 
 		// ******************************************************************************
 		if (MINUIT_ON) {

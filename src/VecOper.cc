@@ -218,8 +218,8 @@ TLegend* AddLegend(std::vector<TH1*> histo, std::vector<std::string> names) {
 // Normalize ROOT histogram
 void NormHist(TH1F* h) {
 
-	double norm = h->GetEntries();
-	if (norm) h->Scale(1.0/norm);
+	Double_t norm = 1;
+	h->Scale(norm/h->Integral(), "width");
 }
 
 

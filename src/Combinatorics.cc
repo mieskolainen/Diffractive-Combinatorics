@@ -1,7 +1,6 @@
 // Combinatorics analysis class for Combinatorial Diffractive Cross Sections
 //
-//
-// mikael.mieskolainen@cern.ch, 2018
+// mikael.mieskolainen@cern.ch, 2019
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 
@@ -280,24 +279,24 @@ Combinatorics::Combinatorics(
 			TString side = "";
 			side = k == 0 ? "C" : "A";
 
-			hSPDFO[c][k] 	= new TH1F(Form("hSPDFO%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d : SPD%s; Fired chips [#]", c, side.Data()), 300, 0, 600);
+			hSPDFO[c][k] 	= new TH1F(Form("hSPDFO%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: SPD%s; Fired chips [#]", c, side.Data()), 256, 0, 256);
 
-			hZDN[c][k] 		= new TH1F(Form("hZDN%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDN%s;Signal [A/D-C units];", c, side.Data()), 500, 0, 3500);
-			hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Signal [A/D-C units];", c, side.Data()), 500, 0, 3500);
+			hZDN[c][k] 		= new TH1F(Form("hZDN%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDN%s;Charge [A/D-C units];", c, side.Data()), 500, 0, 3500);
+			hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Charge [A/D-C units];", c, side.Data()), 500, 0, 3500);
 
 			hADCharge[c][k] = new TH1F(Form("hADCharge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Charge [A/D-C units];", c, side.Data()), 1536, 0, 6144);
 			hADTime[c][k]   = new TH1F(Form("hADTime%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];", c, side.Data()), 500, 50, 75);
 
-			hV0Charge[c][k] = new TH1F(Form("hV0Charge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Charge [A/D-C units];", c, side.Data()), 512, 0, 1024);
+			hV0Charge[c][k] = new TH1F(Form("hV0Charge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Charge [A/D-C units];", c, side.Data()), 512, 0, 512);
 			hV0Time[c][k]   = new TH1F(Form("hV0Time%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];", c, side.Data()), 500, -5, 20);
 
 			h2ADCT[c][k] 	= new TH2F(Form("h2ADCT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, 50, 75, 200, 0, 6144);
 			h2V0CT[c][k] 	= new TH2F(Form("h2V0CT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, -5, 20, 200, 0, 1024);
-		
-			h2SPDFOTR[c][k] = new TH2F(Form("h2SPDFOTR%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d : SPD%s; Tracklets (full SPD) [#]; Fired chips [#]", c, side.Data()), 100, 0, 100, 100, 0, 100);
+			
+			h2SPDFOTR[c][k] = new TH2F(Form("h2SPDFOTR%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: SPD%s; Tracklets (full SPD) [#]; Fired chips [#]", c, side.Data()), 100, 0, 100, 100, 0, 100);
 		}
 	}
-
+	
 	// 2D-Cross Correlations
 	std::vector<std::string> det_XC = {"ADC","V0C","SPDC","SPDA","V0A","ADA"};
 	std::vector<std::string> obs_XC = {"Charge","Charge","FiredChip","FiredChip","Charge","Charge"};
@@ -1307,27 +1306,26 @@ void Combinatorics::Plot1D(std::vector<TCanvas*>& can, UInt_t color, UInt_t mark
 				NormHist(hZDN[c][k]);
 				hZDN[c][k]->Draw("SAME");
 
-				can[c]->cd(AD_charge_plot_ind[k])->SetLogx();
+				//can[c]->cd(AD_charge_plot_ind[k])->SetLogx();
 				can[c]->cd(AD_charge_plot_ind[k])->SetLogy();
 
 				hADCharge[c][k]->SetLineColor(color);
 				NormHist(hADCharge[c][k]);
 				hADCharge[c][k]->Draw("SAME");
 
-				can[c]->cd(V0_charge_plot_ind[k])->SetLogx();
+				//can[c]->cd(V0_charge_plot_ind[k])->SetLogx();
 				can[c]->cd(V0_charge_plot_ind[k])->SetLogy();
 
 				hV0Charge[c][k]->SetLineColor(color);
 				NormHist(hV0Charge[c][k]);
 				hV0Charge[c][k]->Draw("SAME");
 
-				can[c]->cd(SPD_FO_plot_ind[k])->SetLogx();
+				//can[c]->cd(SPD_FO_plot_ind[k])->SetLogx();
 				can[c]->cd(SPD_FO_plot_ind[k])->SetLogy();
 
 				hSPDFO[c][k]->SetLineColor(color);
 				NormHist(hSPDFO[c][k]);
 				hSPDFO[c][k]->Draw("SAME");
-
 
 				// Lower row
 				//can[c]->cd(ZDN_plot_ind[k])->SetLogx();
@@ -1763,7 +1761,6 @@ void Combinatorics::Plot() {
 			// Fit
 				hDiffMassSD_gene[side]->Fit("M2fit","ER"); // "E" minos errors, R" restricts the fit
 		}
-
 
 		// Loop over detectors >>
 
