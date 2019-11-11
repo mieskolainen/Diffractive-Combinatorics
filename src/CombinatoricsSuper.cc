@@ -370,7 +370,9 @@ CombinatoricsSuper::CombinatoricsSuper(TString base_path) {
 
 	// SETUP COMMON COLORS here
 	const std::vector<Int_t> markers = {20, 26, 24, 25, 32, 27, 28};
-	const std::vector<Int_t> colors  = {1, 46, 8, 9, kMagenta+3, 30, 41};
+
+	// 1 black, 46 red, 8 green, 9 blue, magenta, 30 light green, 41 yellow
+	const std::vector<Int_t> colors  = {1, 46, 8, 9, kMagenta+3, 30, 41}; 
 	markers_ = markers;
 	colors_  = colors;
 }
