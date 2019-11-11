@@ -214,14 +214,19 @@ TLegend* AddLegend(std::vector<TH1*> histo, std::vector<std::string> names) {
 	return leg;
 }
 
-
 // Normalize ROOT histogram
 void NormHist(TH1F* h) {
+	Double_t norm = h->GetEntries();
+	if (norm > 0) {
+		h->Scale(1/norm);
+	}
+}
 
+// Normalize ROOT histogram
+void NormHistIntegral(TH1F* h) {
 	Double_t norm = 1;
 	h->Scale(norm/h->Integral(), "width");
 }
-
 
 // Count ratio X/Y error by Taylor expansion
 double GetRatioError(double x, double x_e, double y, double y_e, double cov) {
@@ -234,8 +239,6 @@ double GetRatioError(double x, double x_e, double y, double y_e, double cov) {
 
 	return std::sqrt(var);
 }
-
-
 
 // Get binomial / multinomial errors (The simple formula)
 std::vector<double> GetBinomError(const std::vector<double>& x_count) {

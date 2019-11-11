@@ -280,7 +280,7 @@ Combinatorics::Combinatorics(
 			side = k == 0 ? "C" : "A";
 
 			hSPDFO[c][k] 	= new TH1F(Form("hSPDFO%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: SPD%s; Fired chips [#]", c, side.Data()), 160, 0, 160);
-			
+
 			hZDN[c][k] 		= new TH1F(Form("hZDN%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDN%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 3500);
 			hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 3500);
 
@@ -1304,50 +1304,56 @@ void Combinatorics::Plot1D(std::vector<TCanvas*>& can, UInt_t color, UInt_t mark
 
 				hZDN[c][k]->SetLineColor(color);
 				NormHist(hZDN[c][k]);
+				hZDN[c][k]->SetMaximum(1.0); hZDN[c][k]->SetMinimum(1e-4);
 				hZDN[c][k]->Draw("SAME");
-
+				
 				can[c]->cd(AD_charge_plot_ind[k])->SetLogx();
 				can[c]->cd(AD_charge_plot_ind[k])->SetLogy();
-
+				
 				hADCharge[c][k]->SetLineColor(color);
 				NormHist(hADCharge[c][k]);
+				hADCharge[c][k]->SetMaximum(1.0); hADCharge[c][k]->SetMinimum(1e-4);
 				hADCharge[c][k]->Draw("SAME");
-
+				
 				can[c]->cd(V0_charge_plot_ind[k])->SetLogx();
 				can[c]->cd(V0_charge_plot_ind[k])->SetLogy();
-
+				
 				hV0Charge[c][k]->SetLineColor(color);
 				NormHist(hV0Charge[c][k]);
+				hV0Charge[c][k]->SetMaximum(1.0); hV0Charge[c][k]->SetMinimum(1e-4);
 				hV0Charge[c][k]->Draw("SAME");
-
+				
 				can[c]->cd(SPD_FO_plot_ind[k])->SetLogx();
 				can[c]->cd(SPD_FO_plot_ind[k])->SetLogy();
-
+				
 				hSPDFO[c][k]->SetLineColor(color);
 				NormHist(hSPDFO[c][k]);
+				hSPDFO[c][k]->SetMaximum(1.0); hSPDFO[c][k]->SetMinimum(1e-4);
 				hSPDFO[c][k]->Draw("SAME");
-
+				
 				// Lower row >>>
-				can[c]->cd(ZDN_plot_ind[k])->SetLogx();
+				can[c]->cd(ZDP_plot_ind[k])->SetLogx();
 				can[c]->cd(ZDP_plot_ind[k])->SetLogy();
-
+				
 				hZDP[c][k]->SetLineColor(color);
 				NormHist(hZDP[c][k]);
+				hZDP[c][k]->SetMaximum(1.0); hZDP[c][k]->SetMinimum(1e-4);
 				hZDP[c][k]->Draw("SAME");
-
+				
 				can[c]->cd(AD_time_plot_ind[k])->SetLogy();
-
+				
 				hADTime[c][k]->SetLineColor(color);
 				NormHist(hADTime[c][k]);
+				hADTime[c][k]->SetMaximum(1.0); hADTime[c][k]->SetMinimum(1e-4);
 				hADTime[c][k]->Draw("SAME");
-
+				
 				can[c]->cd(V0_time_plot_ind[k])->SetLogy();
-
+				
 				hV0Time[c][k]->SetLineColor(color);
 				NormHist(hV0Time[c][k]);
+				hV0Time[c][k]->SetMaximum(1.0); hV0Time[c][k]->SetMinimum(1e-4);
 				hV0Time[c][k]->Draw("SAME");
 			}
-
 
 			//can[c]->cd(SPD_ind_+1)->SetLogx();
 			//can[c]->cd(SPD_ind_+1)->SetLogy();

@@ -55,7 +55,8 @@ namespace VecOper {
 	// Histogram operations
 	TLegend* AddLegend(std::vector<TH1*> histo, std::vector<std::string> names);
 	void NormHist(TH1F* h);
-
+	void NormHistIntegral(TH1F* h);
+	
 	// Statistical errors
 	double GetRatioError(double x, double x_e, double y, double y_e, double cov);
 	std::vector<double> GetBinomError(const std::vector<double>& x_count);
