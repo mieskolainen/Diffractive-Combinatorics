@@ -128,11 +128,11 @@ int main(int argc, char* argv[]) {
   const TString base_path   = "/home/user/cernbox/ALICE/diffxsdata";
 
   // Set runs
-  std::vector<UInt_t> runs = {274593, 274594, 274595};
-  
+  std::vector<UInt_t> runs = {274595, 274594, 274593};
+
   // ********************************************************************  
-  
-  
+
+
   // VERBOSE PRINTING
   VERBOSE_ON = kFALSE;
 
