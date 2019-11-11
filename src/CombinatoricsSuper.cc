@@ -248,15 +248,16 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	scaleC = (IB2/NIB2)*(1/0.5);
 	scaleE = (20.0/2.0);
 
-	printf("Calculation 1: a = %0.3f, c = %0.3f, e = %0.3f \n", scaleA, scaleC, scaleE);
+	printf("Pure beam based scales: a = %0.3f, c = %0.3f, e = %0.3f \n", scaleA, scaleC, scaleE);
 	
 	// Calculate scale factors [luminosity or bunch differences] x [trigger downtime]
 	scaleA = (trdata["B"].LMb / trdata["A"].LMb) * (trdata["B"].L0aL0b / trdata["A"].L0aL0b);
 	scaleC = (trdata["B"].LMb / trdata["C"].LMb) * (trdata["B"].L0aL0b / trdata["C"].L0aL0b);
 	scaleE = (trdata["B"].LMb / trdata["E"].LMb) * (trdata["B"].L0aL0b / trdata["E"].L0aL0b);
 
-	printf("Calculation 2: a = %0.3f, c = %0.3f, e = %0.3f \n", scaleA, scaleC, scaleE);
-
+	printf("Trigger based scales: a = %0.3f, c = %0.3f, e = %0.3f \n", scaleA, scaleC, scaleE);
+	
+	printf("mu-value = %0.3E \n", -std::log(1.0 - trdata["B"].L0bLMb));
     // ----------------------------------------------------------------------------------
 	
  	// Number of datasets
@@ -271,7 +272,7 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	cB->Printx();
 
 	// Residual Beam-Gas substraction correction
-
+	
 	// EMPTY - A-side BEAM
 	Combinatorics* cA = new Combinatorics(Form("%s/%s/%d/AnalysisResults.root", 
 		base_path_.Data(), run_path[0].Data(), run_num[0]), "Data_A", isMC, 1.0, 0.0, run_num[0], trdata["A"]);
