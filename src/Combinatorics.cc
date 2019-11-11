@@ -279,24 +279,24 @@ Combinatorics::Combinatorics(
 			TString side = "";
 			side = k == 0 ? "C" : "A";
 
-			hSPDFO[c][k] 	= new TH1F(Form("hSPDFO%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: SPD%s; Fired chips [#]", c, side.Data()), 256, 0, 256);
+			hSPDFO[c][k] 	= new TH1F(Form("hSPDFO%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: SPD%s; Fired chips [#]", c, side.Data()), 160, 0, 160);
+			
+			hZDN[c][k] 		= new TH1F(Form("hZDN%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDN%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 3500);
+			hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 3500);
 
-			hZDN[c][k] 		= new TH1F(Form("hZDN%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDN%s;Charge [A/D-C units];", c, side.Data()), 500, 0, 3500);
-			hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Charge [A/D-C units];", c, side.Data()), 500, 0, 3500);
-
-			hADCharge[c][k] = new TH1F(Form("hADCharge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Charge [A/D-C units];", c, side.Data()), 1536, 0, 6144);
+			hADCharge[c][k] = new TH1F(Form("hADCharge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 6000);
 			hADTime[c][k]   = new TH1F(Form("hADTime%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];", c, side.Data()), 500, 50, 75);
 
-			hV0Charge[c][k] = new TH1F(Form("hV0Charge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Charge [A/D-C units];", c, side.Data()), 512, 0, 512);
+			hV0Charge[c][k] = new TH1F(Form("hV0Charge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 400);
 			hV0Time[c][k]   = new TH1F(Form("hV0Time%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];", c, side.Data()), 500, -5, 20);
 
-			h2ADCT[c][k] 	= new TH2F(Form("h2ADCT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, 50, 75, 200, 0, 6144);
-			h2V0CT[c][k] 	= new TH2F(Form("h2V0CT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, -5, 20, 200, 0, 1024);
+			h2ADCT[c][k] 	= new TH2F(Form("h2ADCT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, 50, 75, 200, 0, 6000);
+			h2V0CT[c][k] 	= new TH2F(Form("h2V0CT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, -5, 20, 200, 0, 400);
 			
 			h2SPDFOTR[c][k] = new TH2F(Form("h2SPDFOTR%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: SPD%s; Tracklets (full SPD) [#]; Fired chips [#]", c, side.Data()), 100, 0, 100, 100, 0, 100);
 		}
 	}
-	
+
 	// 2D-Cross Correlations
 	std::vector<std::string> det_XC = {"ADC","V0C","SPDC","SPDA","V0A","ADA"};
 	std::vector<std::string> obs_XC = {"Charge","Charge","FiredChip","FiredChip","Charge","Charge"};
