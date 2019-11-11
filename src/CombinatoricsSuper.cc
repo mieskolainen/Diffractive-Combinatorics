@@ -249,11 +249,11 @@ Bool_t CombinatoricsSuper::Initialize(const Int_t RUN) {
 	scaleE = (20.0/2.0);
 
 	printf("Calculation 1: a = %0.3f, c = %0.3f, e = %0.3f \n", scaleA, scaleC, scaleE);
-
-	// Calculate scale factors
-	scaleA = (trdata["B"].LMb / trdata["A"].LMa) * (trdata["B"].L0aL0b / trdata["A"].L0aL0b);
-	scaleC = (trdata["B"].LMb / trdata["C"].LMa) * (trdata["B"].L0aL0b / trdata["C"].L0aL0b);
-	scaleE = (trdata["B"].LMb / trdata["E"].LMa) * (trdata["B"].L0aL0b / trdata["E"].L0aL0b);
+	
+	// Calculate scale factors [luminosity or bunch differences] x [trigger downtime]
+	scaleA = (trdata["B"].LMb / trdata["A"].LMb) * (trdata["B"].L0aL0b / trdata["A"].L0aL0b);
+	scaleC = (trdata["B"].LMb / trdata["C"].LMb) * (trdata["B"].L0aL0b / trdata["C"].L0aL0b);
+	scaleE = (trdata["B"].LMb / trdata["E"].LMb) * (trdata["B"].L0aL0b / trdata["E"].L0aL0b);
 
 	printf("Calculation 2: a = %0.3f, c = %0.3f, e = %0.3f \n", scaleA, scaleC, scaleE);
 

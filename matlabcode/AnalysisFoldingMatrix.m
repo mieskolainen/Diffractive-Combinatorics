@@ -57,8 +57,8 @@ end
 %set(gca,'YDir','normal');
 set(gca,'FontSize', 6);
 
-xlabel('Generator level', 'interpreter', 'latex', 'fontsize', 12);
-ylabel('Detector level',  'interpreter', 'latex', 'fontsize', 12);
+xlabel('Generator', 'interpreter', 'latex', 'fontsize', 12);
+ylabel('Detector',  'interpreter', 'latex', 'fontsize', 12);
 
 %labels = {};
 %for i = 0:size(X,1)-1
