@@ -11,7 +11,6 @@
 // TE->Draw("","(fEventInfo.fClassMask & (1<<20)) != 0 && fADInfo.fDecisionOffline[0] == 1
 // && fV0Info.fDecisionOffline[0] == 0 && fV0Info.fDecisionOffline[1] == 0 && fADInfo.fDecisionOffline[1] == 0", "GOFF")
 //
-//
 // - Fit based on also on the multiplicity information (1.average), (2.histogram shape)
 //   how to take care of gain invariance?
 //

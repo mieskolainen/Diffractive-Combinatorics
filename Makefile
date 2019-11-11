@@ -11,7 +11,7 @@
 #        make clean
 #        make superclean
 #
-# mikael.mieskolainen@cern.ch, 2018
+# mikael.mieskolainen@cern.ch, 2019
 # Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 
