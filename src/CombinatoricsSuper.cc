@@ -663,11 +663,11 @@ void CombinatoricsSuper::PlotAll1D() {
 
 		if (d_ == 6) {
 			// +2 from ZDN + ZDP on sides
-			can[k]->Divide(d_ + 2, 2, 0.0075, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
+			can[k]->Divide(d_ + 2, 2, 0.001, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
 		}
 		if (d_ == 8) {
 			// +2 from ZDN + ZDP on sides
-			can[k]->Divide(d_, 2, 0.0075, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
+			can[k]->Divide(d_, 2, 0.001, 0.001); // (horizontal, vertical, x-margin, y-margin) boxes
 		}
 	}
 	

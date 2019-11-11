@@ -285,10 +285,10 @@ Combinatorics::Combinatorics(
 			hZDP[c][k]   	= new TH1F(Form("hZDP%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: ZDP%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 3500);
 
 			hADCharge[c][k] = new TH1F(Form("hADCharge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 6000);
-			hADTime[c][k]   = new TH1F(Form("hADTime%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];", c, side.Data()), 500, 50, 75);
+			hADTime[c][k]   = new TH1F(Form("hADTime%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];", c, side.Data()), 200, 50, 75);
 
 			hV0Charge[c][k] = new TH1F(Form("hV0Charge%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Charge [A/D-C units];", c, side.Data()), 200, 0, 400);
-			hV0Time[c][k]   = new TH1F(Form("hV0Time%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];", c, side.Data()), 500, -5, 20);
+			hV0Time[c][k]   = new TH1F(Form("hV0Time%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];", c, side.Data()), 200, -5, 20);
 
 			h2ADCT[c][k] 	= new TH2F(Form("h2ADCT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: AD%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, 50, 75, 200, 0, 6000);
 			h2V0CT[c][k] 	= new TH2F(Form("h2V0CT%d_%d_%s", k, c, fMCName_.Data()), Form("ID%d: V0%s;Time [ns];Charge [A/D-C units]", c, side.Data()), 200, -5, 20, 200, 0, 400);
@@ -1298,37 +1298,37 @@ void Combinatorics::Plot1D(std::vector<TCanvas*>& can, UInt_t color, UInt_t mark
 			// Loop over C and A-side
 			for (UInt_t k = 0; k < 2; ++k) {
 
-				// Upper row
-				//can[c]->cd(ZDN_plot_ind[k])->SetLogx();
+				// Upper row >>>
+				can[c]->cd(ZDN_plot_ind[k])->SetLogx();
 				can[c]->cd(ZDN_plot_ind[k])->SetLogy();
 
 				hZDN[c][k]->SetLineColor(color);
 				NormHist(hZDN[c][k]);
 				hZDN[c][k]->Draw("SAME");
 
-				//can[c]->cd(AD_charge_plot_ind[k])->SetLogx();
+				can[c]->cd(AD_charge_plot_ind[k])->SetLogx();
 				can[c]->cd(AD_charge_plot_ind[k])->SetLogy();
 
 				hADCharge[c][k]->SetLineColor(color);
 				NormHist(hADCharge[c][k]);
 				hADCharge[c][k]->Draw("SAME");
 
-				//can[c]->cd(V0_charge_plot_ind[k])->SetLogx();
+				can[c]->cd(V0_charge_plot_ind[k])->SetLogx();
 				can[c]->cd(V0_charge_plot_ind[k])->SetLogy();
 
 				hV0Charge[c][k]->SetLineColor(color);
 				NormHist(hV0Charge[c][k]);
 				hV0Charge[c][k]->Draw("SAME");
 
-				//can[c]->cd(SPD_FO_plot_ind[k])->SetLogx();
+				can[c]->cd(SPD_FO_plot_ind[k])->SetLogx();
 				can[c]->cd(SPD_FO_plot_ind[k])->SetLogy();
 
 				hSPDFO[c][k]->SetLineColor(color);
 				NormHist(hSPDFO[c][k]);
 				hSPDFO[c][k]->Draw("SAME");
 
-				// Lower row
-				//can[c]->cd(ZDN_plot_ind[k])->SetLogx();
+				// Lower row >>>
+				can[c]->cd(ZDN_plot_ind[k])->SetLogx();
 				can[c]->cd(ZDP_plot_ind[k])->SetLogy();
 
 				hZDP[c][k]->SetLineColor(color);
