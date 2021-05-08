@@ -54,9 +54,9 @@ make dictionary
 make -j4
 ```
 
-## Citation
+## Reference
 
-If you find this work useful, you may cite the paper:
+If you use this work in your research, please cite the paper:
 
 ```
 @article{mieskolainen2019combinatorial,
